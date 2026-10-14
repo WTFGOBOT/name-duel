@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<script src="./config.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#fff7ee}
+a{color:#6c5ce7}a:hover{color:#4b3bc4}
+@keyframes popA{0%{transform:translateY(60px) scale(.5) rotate(-4deg);opacity:0}65%{transform:translateY(-8px) scale(1.04) rotate(1deg);opacity:1}100%{transform:none;opacity:1}}
+@keyframes popB{0%{transform:translateY(60px) scale(.5) rotate(-4deg);opacity:0}65%{transform:translateY(-8px) scale(1.04) rotate(1deg);opacity:1}100%{transform:none;opacity:1}}
+@keyframes fall{0%{transform:translateY(-30px) rotate(0);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:.9}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-22px)}}
+@keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,200,40,.7)}50%{transform:scale(1.04);box-shadow:0 0 0 18px rgba(255,200,40,0)}}
+@keyframes rise{0%{transform:translateY(20px);opacity:0}100%{transform:none;opacity:1}}
+@keyframes zoom{0%{transform:scale(.3);opacity:0}70%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+@keyframes shine{0%{background-position:0 50%}100%{background-position:200% 50%}}
+</style>
+</helmet>
+<div style="min-height:100vh;font-family:'Nunito',system-ui,sans-serif;color:#2a2250;background:radial-gradient(circle at 10% 0%,#ffe0ec 0,transparent 40%),radial-gradient(circle at 95% 10%,#dcd6ff 0,transparent 40%),radial-gradient(circle at 50% 100%,#d6f3ee 0,transparent 45%),#fff7ee">
+<sc-for list="{{ confetti }}" as="c" hint-placeholder-count="0"><span style="{{ c.style }}"></span></sc-for>
+
+<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px 32px;max-width:1160px;margin:0 auto">
+<div onClick="{{ goHome }}" style="display:flex;align-items:center;gap:12px;cursor:pointer">
+<div style="width:46px;height:46px;border-radius:16px;background:linear-gradient(135deg,#e8336f,#6c5ce7);display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Fredoka';font-weight:700;font-size:26px;transform:rotate(-6deg)">N</div>
+<div style="font-family:'Fredoka';font-weight:700;font-size:28px;letter-spacing:-.5px">Name Duel</div></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<sc-for list="{{ nav }}" as="n" hint-placeholder-count="4"><button onClick="{{ n.onClick }}" style="{{ n.style }}">{{ n.label }}</button></sc-for>
+</div></div>
+
+<div style="max-width:1160px;margin:0 auto;padding:8px 32px 64px">
+
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;gap:26px;animation:rise .5s both">
+<div style="background:linear-gradient(135deg,#1fb5a5,#1a86c4 60%,#6c5ce7);color:#fff;border-radius:40px;padding:34px clamp(22px,4vw,44px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:32px;align-items:center;box-shadow:0 20px 50px rgba(40,20,90,.2)">
+<div style="display:grid;gap:12px"><div style="font-family:'Fredoka';font-weight:700;font-size:clamp(36px,5vw,52px);line-height:1.05;text-wrap:balance">Help Meg &amp; Cathleen pick a name</div>
+<div style="font-size:18px;font-weight:600;line-height:1.45">Love, Like or Pass on {{ famTotal }} names. Takes about two minutes.</div>
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="background:#fff;color:#2a2250;font-family:'Fredoka';font-weight:700;font-size:17px;border-radius:999px;padding:5px 14px">{{ voterCountLabel }}</span>
+<sc-for list="{{ voterChips }}" as="v" hint-placeholder-count="0"><span title="{{ v.name }}" style="{{ v.style }}">{{ v.initial }}</span></sc-for><span style="font-weight:800;font-size:16px">{{ voterMore }}</span></div></div>
+<div style="background:#fff;color:#2a2250;border-radius:30px;padding:24px;display:grid;gap:12px">
+<sc-if value="{{ showSetup }}"><div style="font-family:'Fredoka';font-weight:700;font-size:26px">Voting opens soon</div><div style="font-size:16px;line-height:1.5">The family vote isn't switched on yet. Check back shortly.</div></sc-if>
+<sc-if value="{{ showOtherErr }}"><div style="font-weight:800;color:#d6291f">{{ hubErr }}</div></sc-if>
+<sc-if value="{{ showAuth }}"><div style="font-family:'Fredoka';font-weight:700;font-size:24px">What's your name?</div>
+<input value="{{ fmName }}" onInput="{{ onFmName }}" placeholder="Your name" style="font:700 17px 'Nunito';padding:13px 18px;border-radius:18px;border:2px solid #d9d2f5;color:#2a2250;outline:none">
+<button onClick="{{ famLogin }}" style="font-family:'Fredoka';font-weight:700;font-size:22px;color:#fff;background:#1fb5a5;border:none;border-radius:999px;padding:14px;cursor:pointer;box-shadow:0 6px 0 #12857a" style-active="transform:translateY(5px);box-shadow:0 1px 0 #12857a">{{ fmBtn }}</button>
+<div style="font-weight:800;color:#d6291f">{{ fmMsg }}</div>
+<div style="font-size:14px;font-weight:600;opacity:.8">Come back with the same name to redo your picks.</div></sc-if>
+<sc-if value="{{ showMe }}"><div style="font-family:'Fredoka';font-weight:700;font-size:28px">Hi {{ famName }}!</div>
+<button onClick="{{ startPlay }}" style="font-family:'Fredoka';font-weight:700;font-size:22px;color:#fff;background:#1fb5a5;border:none;border-radius:999px;padding:14px;cursor:pointer;box-shadow:0 6px 0 #12857a" style-active="transform:translateY(5px);box-shadow:0 1px 0 #12857a">{{ startLabel }}</button>
+<sc-if value="{{ hasAttempts }}"><button onClick="{{ viewLast }}" style="font-family:'Fredoka';font-weight:600;font-size:17px;color:#2a2250;background:#fff;border:2px solid #2a2250;border-radius:999px;padding:10px;cursor:pointer">See my last picks</button></sc-if>
+<div style="font-weight:800;color:#d6291f">{{ fmMsg }}</div>
+<button onClick="{{ famSignOut }}" style="justify-self:start;font-weight:700;font-size:14px;background:none;border:none;color:#6c5ce7;cursor:pointer;text-decoration:underline;padding:0">Not {{ famName }}? Sign out</button></sc-if></div></div>
+
+<sc-if value="{{ showBoard }}"><div style="background:#fff;border-radius:40px;padding:28px clamp(18px,3vw,32px);box-shadow:0 14px 36px rgba(80,50,140,.1);display:grid;gap:18px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap"><div style="font-family:'Fredoka';font-weight:700;font-size:34px">The scoreboard</div>
+<div style="display:flex;gap:8px"><sc-for list="{{ resChips }}" as="c" hint-placeholder-count="2"><button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:12px">
+<sc-for list="{{ statusCols }}" as="p" hint-placeholder-count="2"><div style="border-radius:20px;padding:12px 16px;background:{{ p.soft }};display:grid;gap:8px"><div style="font-family:'Fredoka';font-weight:700;font-size:19px;color:{{ p.color }}">{{ p.name }}</div>
+<sc-for list="{{ p.rows }}" as="x" hint-placeholder-count="2"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:rgba(255,255,255,.7);border-radius:16px;padding:8px 12px">
+<sc-if value="{{ x.isBoy }}"><svg width="24" height="24" viewBox="0 0 48 48" style="flex:none" fill="none" stroke="#1a86c4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><circle cx="19" cy="29" r="11"></circle><path d="M27 21 L40 8 M28 8 H40 V20"></path></svg></sc-if><sc-if value="{{ x.isGirl }}"><svg width="24" height="24" viewBox="0 0 48 48" style="flex:none" fill="none" stroke="#d9531e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="18" r="11"></circle><path d="M24 29 V45 M16 38 H32"></path></svg></sc-if>
+<div style="flex:1;min-width:120px"><div style="font-weight:700;font-size:14px;opacity:.85">{{ x.label }}: {{ x.status }}</div>
+<sc-if value="{{ x.done }}"><div style="font-weight:700;font-size:13px">Picked <b style="font-family:'Fredoka';font-size:20px">{{ x.winner }}</b></div></sc-if></div>
+<sc-if value="{{ x.done }}"><button onClick="{{ x.onView }}" style="font-family:'Fredoka';font-weight:600;font-size:15px;color:#fff;background:{{ p.color }};border:none;border-radius:999px;padding:7px 16px;cursor:pointer">See results</button></sc-if></div></sc-for></div></sc-for></div>
+<sc-if value="{{ showShared }}"><div style="background:linear-gradient(90deg,#fff3d6,#ffe3ee);border-radius:24px;padding:16px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap"><span style="font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.5px">{{ sharedWho }}</span><span style="font-family:'Fredoka';font-weight:700;font-size:30px">{{ sharedName }}</span><span style="font-weight:600;font-size:15px">{{ sharedNote }}</span></div></sc-if>
+<div style="display:flex;gap:18px;flex-wrap:wrap;font-weight:800;font-size:14px"><span style="color:#e8336f">■ Love</span><span style="color:#6c5ce7">■ Like</span><span style="color:#8a84a8">■ Pass</span></div>
+<div style="font-weight:800;color:#d6291f">{{ fmMsg }}</div>
+<div style="display:grid;gap:8px">
+<sc-for list="{{ boardRows }}" as="r" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:44px minmax(0,1.3fr) minmax(0,1.6fr) auto;gap:16px;align-items:center;background:#faf8ff;border-radius:20px;padding:10px 18px">
+<div style="font-family:'Fredoka';font-weight:700;font-size:20px;width:38px;height:38px;border-radius:50%;background:#dff5f2;display:flex;align-items:center;justify-content:center">{{ r.rank }}</div>
+<div><div style="font-family:'Fredoka';font-weight:700;font-size:23px;word-break:break-word">{{ r.name }}</div><div style="font-size:13px;font-weight:600;opacity:.8">{{ r.meaning }}</div></div>
+<div style="display:grid;gap:3px"><div style="display:flex;height:12px;border-radius:99px;overflow:hidden;background:#ece8f7"><span style="width:{{ r.love }}%;background:#e8336f"></span><span style="width:{{ r.like }}%;background:#6c5ce7"></span><span style="width:{{ r.pass }}%;background:#8a84a8"></span></div><div style="font-weight:800;font-size:12px">{{ r.counts }}</div></div>
+<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap"><span style="background:#ffe3ee;color:#b81f52;font-weight:800;font-size:14px;border-radius:999px;padding:4px 12px">Meg {{ r.meg }}</span><span style="background:#e6e2ff;color:#4b3bc4;font-weight:800;font-size:14px;border-radius:999px;padding:4px 12px">Cath {{ r.cath }}</span></div></div></sc-for></div>
+<sc-if value="{{ hasMore }}"><button onClick="{{ toggleMore }}" style="justify-self:center;background:none;border:none;font-weight:800;color:#6c5ce7;text-decoration:underline;font-size:15px;cursor:pointer">{{ moreLabel }}</button></sc-if></div></sc-if>
+
+<div style="text-align:center;font-weight:700;font-size:14px;display:flex;justify-content:center;gap:24px;flex-wrap:wrap"><span style="opacity:.85">Meg or Cathleen? Use the duels button at the top (PIN needed)</span><button onClick="{{ openManage }}" style="background:none;border:none;font:inherit;font-weight:700;text-decoration:underline;color:#6c5ce7;cursor:pointer;padding:0">Manage names</button></div>
+</div></sc-if>
+
+<sc-if value="{{ isDuels }}">
+<div style="margin-top:8px;display:grid;gap:6px"><div style="font-family:'Fredoka';font-weight:700;font-size:clamp(30px,4vw,44px)">Meg &amp; Cathleen's duels</div>
+<div style="font-size:17px;font-weight:600">Your own head-to-head picks. Friends' votes never change these. {{ nameCount }} names loaded.</div>
+<sc-if value="{{ adminHint }}"><div style="font-weight:700;font-size:15px;background:#fff3cd;border-radius:16px;padding:10px 14px;justify-self:start">Friends can't see your progress yet. <button onClick="{{ openManage }}" style="background:none;border:none;font:inherit;font-weight:800;text-decoration:underline;color:#6c5ce7;cursor:pointer;padding:0">Enter the admin key</button> on this device.</div></sc-if></div>
+<div style="margin-top:20px">
+<sc-if value="{{ noNames }}">
+<div style="margin-top:40px;background:#fff;border-radius:36px;padding:48px;text-align:center;box-shadow:0 20px 50px rgba(80,50,140,.12)">
+<div style="font-family:'Fredoka';font-size:40px;font-weight:700">Let's load your name list</div>
+<p style="font-size:18px;margin:12px 0 24px">Upload your spreadsheet to get started.</p>
+<button onClick="{{ goImport }}" style="font-family:'Fredoka';font-weight:600;font-size:22px;color:#fff;background:linear-gradient(135deg,#e8336f,#6c5ce7);border:none;border-radius:999px;padding:16px 36px;cursor:pointer;box-shadow:0 8px 0 #4b3bc4">Import names</button>
+</div></sc-if>
+
+
+<sc-if value="{{ hasNames }}"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:28px">
+<sc-for list="{{ persons }}" as="p" hint-placeholder-count="2">
+<div style="background:#fff;border-radius:40px;overflow:hidden;box-shadow:0 20px 50px rgba(80,50,140,.14);animation:rise .6s both">
+<div style="background:{{ p.grad }};color:#fff;padding:26px 32px;font-family:'Fredoka';font-weight:700;font-size:44px;display:flex;align-items:center;gap:14px">
+<span style="width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.28);display:inline-flex;align-items:center;justify-content:center;font-size:30px">{{ p.initial }}</span>{{ p.name }}</div>
+<div style="padding:22px;display:grid;gap:16px">
+<sc-if value="{{ p.locked }}"><div style="border-radius:28px;padding:22px;background:{{ p.soft }};display:grid;gap:12px"><div style="font-family:'Fredoka';font-weight:700;font-size:26px">Enter {{ p.name }}'s PIN</div><div style="font-weight:600">Only {{ p.name }} can start or view these duels.</div>
+<input type="password" inputmode="numeric" value="{{ p.pin }}" onInput="{{ p.onPin }}" placeholder="PIN" style="font:700 18px 'Nunito';padding:14px 20px;border-radius:20px;border:2px solid #d9d2f5;color:#2a2250;outline:none;background:#fff">
+<button onClick="{{ p.unlock }}" style="font-family:'Fredoka';font-weight:600;font-size:20px;color:#fff;background:{{ p.color }};border:none;border-radius:999px;padding:12px 28px;cursor:pointer;box-shadow:0 6px 0 {{ p.dark }}">Unlock</button>
+<div style="font-weight:800;color:#d6291f">{{ p.pinErr }}</div></div></sc-if>
+<sc-if value="{{ p.open }}"><sc-for list="{{ p.tiles }}" as="t" hint-placeholder-count="2">
+<div style="border-radius:28px;padding:20px;background:{{ p.soft }};display:grid;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+<div style="font-family:'Fredoka';font-weight:700;font-size:30px;display:flex;align-items:center;gap:12px"><sc-if value="{{ t.isBoy }}"><svg width="48" height="48" viewBox="0 0 48 48" style="flex:none" fill="none" stroke="#1a86c4" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="19" cy="29" r="11"></circle><path d="M27 21 L40 8 M28 8 H40 V20"></path></svg></sc-if><sc-if value="{{ t.isGirl }}"><svg width="48" height="48" viewBox="0 0 48 48" style="flex:none" fill="none" stroke="#d9531e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="18" r="11"></circle><path d="M24 29 V45 M16 38 H32"></path></svg></sc-if>{{ t.label }}</div>
+<div style="font-weight:800;font-size:14px;padding:6px 14px;border-radius:999px;background:#fff;color:#2a2250">{{ t.status }}</div></div>
+<sc-if value="{{ t.warn }}"><div style="display:flex;gap:10px;align-items:center;background:#fff3cd;border:2px solid #f2b600;border-radius:18px;padding:8px 14px;font-weight:800;font-size:14px;color:#6b4a00"><span style="font-size:22px;line-height:1">⚠</span><span>{{ t.warnText }}</span></div></sc-if>
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+<button onClick="{{ t.onStart }}" style="font-family:'Fredoka';font-weight:600;font-size:20px;color:#fff;background:{{ p.color }};border:none;border-radius:999px;padding:12px 28px;cursor:pointer;box-shadow:0 6px 0 {{ p.dark }}" style-active="transform:translateY(4px);box-shadow:0 2px 0 {{ p.dark }}">{{ t.btn }}</button>
+<sc-if value="{{ t.hasView }}"><button onClick="{{ t.onView }}" style="font-family:'Fredoka';font-weight:600;font-size:18px;color:#2a2250;background:#fff;border:2px solid #2a2250;border-radius:999px;padding:10px 22px;cursor:pointer">View ranking</button></sc-if>
+</div></div>
+</sc-for></sc-if></div></div>
+</sc-for></div>
+
+<div style="margin-top:40px;text-align:center;font-family:'Fredoka';font-weight:700;font-size:32px">Together</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-top:16px">
+<sc-for list="{{ sharedTiles }}" as="s" hint-placeholder-count="2">
+<div style="background:#fff;border-radius:32px;padding:22px 26px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;box-shadow:0 14px 36px rgba(80,50,140,.1)">
+<div style="font-family:'Fredoka';font-weight:700;font-size:30px;display:flex;align-items:center;gap:12px"><sc-if value="{{ s.isBoy }}"><svg width="48" height="48" viewBox="0 0 48 48" style="flex:none" fill="none" stroke="#1a86c4" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="19" cy="29" r="11"></circle><path d="M27 21 L40 8 M28 8 H40 V20"></path></svg></sc-if><sc-if value="{{ s.isGirl }}"><svg width="48" height="48" viewBox="0 0 48 48" style="flex:none" fill="none" stroke="#d9531e" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="18" r="11"></circle><path d="M24 29 V45 M16 38 H32"></path></svg></sc-if>{{ s.label }}</div>
+<sc-if value="{{ s.ready }}"><button onClick="{{ s.onOpen }}" style="font-family:'Fredoka';font-weight:700;font-size:20px;color:#2a2250;background:linear-gradient(90deg,#ffd23f,#ff9ec4,#a99bff,#ffd23f);background-size:200% 100%;border:none;border-radius:999px;padding:16px 28px;cursor:pointer;animation:pulse 1.6s infinite,shine 3s linear infinite">Your shared favourite is ready!</button></sc-if>
+<sc-if value="{{ s.waiting }}"><div style="font-weight:700;font-size:15px;opacity:.75;max-width:230px">{{ s.note }}</div></sc-if>
+</div></sc-for></div>
+
+</sc-if></div></sc-if>
+
+<sc-if value="{{ isGate }}"><div style="max-width:480px;margin:40px auto 0;background:#fff;border-radius:36px;padding:36px;box-shadow:0 20px 50px rgba(80,50,140,.14);display:grid;gap:14px">
+<div style="font-family:'Fredoka';font-weight:700;font-size:32px">Manage names</div><div style="font-size:16px;line-height:1.5">Enter your admin key to choose which names go to the family vote and publish them.</div>
+<input type="password" value="{{ gateKey }}" onInput="{{ onGateKey }}" placeholder="Admin key" style="font:700 17px 'Nunito';padding:13px 18px;border-radius:18px;border:2px solid #d9d2f5;color:#2a2250;outline:none">
+<button onClick="{{ gateGo }}" style="font-family:'Fredoka';font-weight:700;font-size:22px;color:#fff;background:#6c5ce7;border:none;border-radius:999px;padding:14px;cursor:pointer;box-shadow:0 6px 0 #4b3bc4">Continue</button><div style="font-weight:800;color:#d6291f">{{ gateMsg }}</div></div></sc-if>
+
+<sc-if value="{{ isDuelRes }}"><div style="display:grid;gap:16px;animation:rise .5s both">
+<div style="background:{{ dr.grad }};color:#fff;border-radius:40px;text-align:center;padding:36px 24px;box-shadow:0 20px 50px rgba(80,50,140,.22)"><div style="font-family:'Fredoka';font-weight:600;font-size:clamp(20px,3vw,28px)">{{ dr.line }}</div><div style="font-family:'Fredoka';font-weight:700;font-size:clamp(48px,9vw,110px);line-height:1.1;text-shadow:0 6px 0 rgba(0,0,0,.18);word-break:break-word">{{ dr.winner }}</div><div style="font-weight:700;margin-top:8px">{{ dr.date }}</div></div>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div style="font-family:'Fredoka';font-weight:700;font-size:30px">The full ranking</div><button onClick="{{ goHome }}" style="font-family:'Fredoka';font-weight:600;font-size:18px;color:#2a2250;background:#fff;border:2px solid #2a2250;border-radius:999px;padding:10px 24px;cursor:pointer">Back</button></div>
+<div style="display:grid;gap:8px"><sc-for list="{{ dr.rows }}" as="r" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:56px minmax(120px,1.1fr) 90px minmax(0,2fr);gap:14px;align-items:center;background:#fff;border-radius:22px;padding:12px 18px;box-shadow:0 6px 18px rgba(80,50,140,.07)"><div style="font-family:'Fredoka';font-weight:700;font-size:22px;width:44px;height:44px;border-radius:50%;background:{{ dr.soft }};display:flex;align-items:center;justify-content:center">{{ r.rank }}</div><div style="font-family:'Fredoka';font-weight:700;font-size:24px;word-break:break-word">{{ r.name }}</div><div style="font-weight:800">{{ r.wins }} wins</div><div style="font-size:15px">{{ r.meaning }}</div></div></sc-for></div></div></sc-if>
+
+<sc-if value="{{ isRound }}">
+<div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+<div style="display:flex;align-items:center;gap:12px"><span style="background:{{ rcolor }};color:#fff;font-family:'Fredoka';font-weight:700;font-size:20px;padding:8px 20px;border-radius:999px">{{ rperson }} · {{ rgender }}</span>
+<span style="font-weight:800;font-size:16px;background:#fff;padding:8px 16px;border-radius:999px">Names remaining: {{ remaining }}</span></div>
+<div style="display:flex;gap:10px">
+<button onClick="{{ goHome }}" style="font-family:'Fredoka';font-weight:600;font-size:16px;background:#fff;color:#2a2250;border:2px solid #2a2250;border-radius:999px;padding:8px 20px;cursor:pointer">Pause &amp; exit</button></div></div>
+<div style="height:10px;border-radius:99px;background:rgba(42,34,80,.1);margin-top:16px;overflow:hidden"><div style="height:100%;width:{{ progress }}%;background:{{ rcolor }};border-radius:99px;transition:width .5s"></div></div>
+<div style="text-align:center;font-family:'Fredoka';font-weight:700;font-size:clamp(30px,4vw,48px);margin:36px 0 28px">Which name do you like better?</div>
+<div style="display:flex;gap:36px;align-items:stretch;flex-wrap:wrap;padding-bottom:30px">
+<sc-for list="{{ cards }}" as="c" hint-placeholder-count="2">
+<button onClick="{{ c.onClick }}" style="{{ c.style }}" style-hover="transform:translateY(-10px) scale(1.02)" style-active="transform:translateY(6px) scale(.98)"><span style="text-wrap:balance;word-break:break-word;text-align:center">{{ c.name }}</span>
+<sc-if value="{{ c.chosen }}"><span style="width:64px;height:64px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;animation:zoom .4s both"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#128a47" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><polyline points="4.5 12.5 9.5 17.5 19.5 6.5"></polyline></svg></span></sc-if><sc-if value="{{ c.loss }}"><span style="font-family:'Nunito';font-weight:800;font-size:16px;background:rgba(255,255,255,.9);color:#2a2250;padding:6px 16px;border-radius:999px">One loss so far</span></sc-if></button>
+</sc-for></div>
+<div style="display:flex;flex-direction:column;align-items:center;gap:14px;padding-bottom:30px">
+<button onClick="{{ undo }}" style="{{ undoStyle }}">← Change my last answer</button>
+<sc-if value="{{ hasRecent }}"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;font-weight:700;font-size:15px"><span style="opacity:.75">Recent picks:</span>
+<sc-for list="{{ recent }}" as="x" hint-placeholder-count="0"><span style="background:#e3f7ec;border-radius:999px;padding:6px 14px"><b style="color:#128a47">{{ x.w }}</b> over {{ x.l }}</span></sc-for></div></sc-if></div>
+</sc-if>
+
+<sc-if value="{{ isResult }}">
+<div style="margin-top:12px;background:{{ rv.grad }};border-radius:44px;color:#fff;text-align:center;padding:48px 28px;box-shadow:0 24px 60px rgba(80,50,140,.25);animation:zoom .6s both">
+<div style="font-family:'Fredoka';font-weight:600;font-size:clamp(20px,3vw,30px)">{{ rv.line }}</div>
+<div style="font-family:'Fredoka';font-weight:700;font-size:clamp(56px,11vw,140px);line-height:1.1;margin:10px 0;display:flex;justify-content:center;flex-wrap:wrap;text-shadow:0 6px 0 rgba(0,0,0,.18)">
+<sc-for list="{{ rv.letters }}" as="l" hint-placeholder-count="5"><span style="{{ l.style }}">{{ l.ch }}</span></sc-for></div>
+<div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:12px">
+<span style="background:#fff;color:#2a2250;font-weight:800;border-radius:20px;padding:10px 20px;font-size:18px">Meaning: {{ rv.meaning }}</span>
+<span style="background:#fff;color:#2a2250;font-weight:800;border-radius:20px;padding:10px 20px;font-size:18px">Origin: {{ rv.origin }}</span>
+<span style="background:#fff;color:#2a2250;font-weight:800;border-radius:20px;padding:10px 20px;font-size:18px">Popularity: {{ rv.pop }}</span></div>
+<div style="margin-top:16px;font-weight:700;opacity:.95">{{ rv.date }}</div></div>
+<div style="font-family:'Fredoka';font-weight:700;font-size:30px;margin:36px 0 14px">The rest of the ranking</div>
+<div style="display:grid;gap:10px">
+<sc-for list="{{ rv.rest }}" as="r" hint-placeholder-count="5">
+<div style="display:grid;grid-template-columns:56px minmax(120px,1.1fr) 90px minmax(0,2fr) minmax(0,1.2fr);gap:14px;align-items:center;background:#fff;border-radius:22px;padding:12px 18px;box-shadow:0 6px 18px rgba(80,50,140,.07)">
+<div style="font-family:'Fredoka';font-weight:700;font-size:22px;width:44px;height:44px;border-radius:50%;background:{{ rv.soft }};display:flex;align-items:center;justify-content:center">{{ r.rank }}</div>
+<div style="font-family:'Fredoka';font-weight:700;font-size:24px;word-break:break-word">{{ r.name }}</div>
+<div style="font-weight:800">{{ r.wins }} wins</div>
+<div style="font-size:15px">{{ r.meaning }}</div>
+<div style="font-size:15px;font-weight:700">{{ r.pop }}</div></div>
+</sc-for></div>
+</sc-if>
+
+<sc-if value="{{ isShared }}">
+<div style="margin-top:12px;text-align:center">
+<div style="font-family:'Fredoka';font-weight:700;font-size:clamp(32px,5vw,52px)">{{ sh.title }}</div>
+<sc-if value="{{ sh.idle }}"><button onClick="{{ sh.start }}" style="margin-top:28px;font-family:'Fredoka';font-weight:700;font-size:28px;color:#2a2250;background:linear-gradient(90deg,#ffd23f,#ff9ec4,#a99bff,#ffd23f);background-size:200% 100%;border:none;border-radius:999px;padding:24px 48px;cursor:pointer;animation:pulse 1.6s infinite,shine 3s linear infinite">Reveal our shared favourite</button></sc-if>
+<sc-if value="{{ sh.drum }}"><div style="margin:30px auto;max-width:700px;background:linear-gradient(135deg,#e8336f,#6c5ce7);border-radius:44px;color:#fff;padding:50px 20px;box-shadow:0 24px 60px rgba(80,50,140,.3)">
+<div style="font-family:'Fredoka';font-weight:600;font-size:22px">{{ sh.status }}</div>
+<div style="font-family:'Fredoka';font-weight:700;font-size:clamp(44px,8vw,96px);margin-top:12px;min-height:110px;word-break:break-word">{{ sh.shuffle }}</div></div></sc-if>
+<sc-if value="{{ sh.reveal }}"><div style="margin:30px auto;max-width:900px;background:linear-gradient(135deg,#e8336f,#6c5ce7 55%,#1a86c4);border-radius:48px;color:#fff;padding:48px 24px;box-shadow:0 24px 60px rgba(80,50,140,.3);animation:zoom .7s both">
+<div style="font-family:'Fredoka';font-weight:600;font-size:clamp(22px,3vw,32px)">Your shared favourite is</div>
+<div style="font-family:'Fredoka';font-weight:700;font-size:clamp(56px,11vw,140px);line-height:1.1;display:flex;justify-content:center;flex-wrap:wrap;text-shadow:0 6px 0 rgba(0,0,0,.18)">
+<sc-for list="{{ sh.letters }}" as="l" hint-placeholder-count="5"><span style="{{ l.style }}">{{ l.ch }}</span></sc-for></div>
+<div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:14px">
+<span style="background:#fff;color:#2a2250;font-weight:800;border-radius:20px;padding:10px 20px;font-size:18px">Meaning: {{ sh.meaning }}</span>
+<span style="background:#fff;color:#2a2250;font-weight:800;border-radius:20px;padding:10px 20px;font-size:18px">Origin: {{ sh.origin }}</span>
+<span style="background:#fff;color:#2a2250;font-weight:800;border-radius:20px;padding:10px 20px;font-size:18px">Popularity: {{ sh.pop }}</span></div></div></sc-if>
+</div>
+<sc-if value="{{ sh.reveal }}">
+<div style="font-family:'Fredoka';font-weight:700;font-size:30px;margin:30px 0 14px">Top 10 shared ranking</div>
+<div style="display:grid;grid-template-columns:56px minmax(120px,1fr) 110px 110px 90px;gap:14px;padding:0 18px 6px;font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:.5px">
+<div>#</div><div>Name</div><div style="color:#e8336f">Meg's rank</div><div style="color:#6c5ce7">Cathleen's rank</div><div>Score</div></div>
+<div style="display:grid;gap:10px">
+<sc-for list="{{ sh.top }}" as="r" hint-placeholder-count="10">
+<div style="display:grid;grid-template-columns:56px minmax(120px,1fr) 110px 110px 90px;gap:14px;align-items:center;background:#fff;border-radius:22px;padding:12px 18px;box-shadow:0 6px 18px rgba(80,50,140,.07)">
+<div style="font-family:'Fredoka';font-weight:700;font-size:22px">{{ r.n }}</div>
+<div style="font-family:'Fredoka';font-weight:700;font-size:24px;word-break:break-word">{{ r.name }}</div>
+<div><span style="display:inline-block;background:#ffe3ee;color:#b81f52;font-weight:800;border-radius:999px;padding:4px 14px">#{{ r.ra }}</span></div>
+<div><span style="display:inline-block;background:#e6e2ff;color:#4b3bc4;font-weight:800;border-radius:999px;padding:4px 14px">#{{ r.rb }}</span></div>
+<div style="font-weight:800">{{ r.score }}</div></div>
+</sc-for></div></sc-if>
+</sc-if>
+
+<sc-if value="{{ isBrowse }}">
+<div style="font-family:'Fredoka';font-weight:700;font-size:44px;margin:12px 0 18px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap">Names
+<button onClick="{{ openAdd }}" style="font-family:'Fredoka';font-weight:600;font-size:20px;color:#fff;background:linear-gradient(135deg,#e8336f,#6c5ce7);border:none;border-radius:999px;padding:12px 28px;cursor:pointer;box-shadow:0 6px 0 #4b3bc4">+ Add a name</button></div>
+<sc-if value="{{ showForm }}"><div style="background:#fff;border-radius:32px;padding:26px;margin-bottom:22px;box-shadow:0 14px 36px rgba(80,50,140,.14);display:grid;gap:14px;animation:rise .4s both">
+<div style="font-family:'Fredoka';font-weight:700;font-size:26px">{{ formTitle }}</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+<input value="{{ fName }}" onInput="{{ onFName }}" placeholder="Name" style="font:700 16px 'Nunito';padding:12px 18px;border-radius:18px;border:2px solid #d9d2f5;color:#2a2250;outline:none">
+<input value="{{ fMeaning }}" onInput="{{ onFMeaning }}" placeholder="Meaning" style="font:600 16px 'Nunito';padding:12px 18px;border-radius:18px;border:2px solid #d9d2f5;color:#2a2250;outline:none">
+<input value="{{ fOrigin }}" onInput="{{ onFOrigin }}" placeholder="Origin" style="font:600 16px 'Nunito';padding:12px 18px;border-radius:18px;border:2px solid #d9d2f5;color:#2a2250;outline:none">
+<input value="{{ fPop }}" onInput="{{ onFPop }}" placeholder="Popularity (e.g. Top 100)" style="font:600 16px 'Nunito';padding:12px 18px;border-radius:18px;border:2px solid #d9d2f5;color:#2a2250;outline:none"></div>
+<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><span style="font-weight:800">Gender:</span>
+<sc-for list="{{ fGenders }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div>
+<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button onClick="{{ autoFill }}" style="font-family:'Fredoka';font-weight:600;font-size:17px;color:#2a2250;background:linear-gradient(90deg,#ffd23f,#ff9ec4);border:none;border-radius:999px;padding:10px 22px;cursor:pointer">{{ fillLabel }}</button><span style="font-weight:600;font-size:14px;opacity:.8">Fills any empty meaning, origin and popularity. Please check it.</span></div>
+<div style="font-weight:800;color:#d6291f">{{ formMsg }}</div>
+<div style="display:flex;gap:12px"><button onClick="{{ saveForm }}" style="font-family:'Fredoka';font-weight:600;font-size:18px;color:#fff;background:#6c5ce7;border:none;border-radius:999px;padding:10px 28px;cursor:pointer">Save name</button>
+<button onClick="{{ closeForm }}" style="font-family:'Fredoka';font-weight:600;font-size:18px;background:#fff;color:#2a2250;border:2px solid #2a2250;border-radius:999px;padding:10px 24px;cursor:pointer">Cancel</button></div></div></sc-if>
+<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:18px">
+<sc-for list="{{ bChips }}" as="c" hint-placeholder-count="2"><button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button></sc-for>
+<input value="{{ q }}" onInput="{{ onQ }}" placeholder="Search names, meanings, origins" style="flex:1;min-width:220px;font:700 16px 'Nunito';padding:12px 20px;border-radius:999px;border:2px solid #d9d2f5;background:#fff;color:#2a2250;outline:none">
+<select value="{{ sort }}" onChange="{{ onSort }}" style="font:700 16px 'Nunito';padding:12px 18px;border-radius:999px;border:2px solid #d9d2f5;background:#fff;color:#2a2250">
+<option value="name">Name A to Z</option><option value="nameD">Name Z to A</option><option value="pop">Most to least popular</option><option value="popD">Least to most popular</option><option value="origin">Origin</option></select>
+<span style="font-weight:800">{{ bCount }} names</span></div>
+<div style="display:grid;grid-template-columns:minmax(130px,1fr) minmax(0,2fr) minmax(0,1fr) minmax(0,1.2fr) 150px;gap:14px;padding:0 20px 6px;font-weight:800;font-size:14px;text-transform:uppercase;letter-spacing:.5px"><div>Name</div><div>Meaning</div><div>Origin</div><div>Popularity</div><div></div></div>
+<div style="display:grid;gap:10px">
+<sc-for list="{{ bList }}" as="r" hint-placeholder-count="8">
+<div style="display:grid;grid-template-columns:minmax(130px,1fr) minmax(0,2fr) minmax(0,1fr) minmax(0,1.2fr) 150px;gap:14px;align-items:center;background:#fff;border-radius:22px;padding:14px 20px;box-shadow:0 6px 18px rgba(80,50,140,.07)">
+<div><div style="font-family:'Fredoka';font-weight:700;font-size:24px;word-break:break-word">{{ r.name }}</div><span style="{{ r.gStyle }}">{{ r.gender }}</span><div style="margin-top:6px"><button onClick="{{ r.onFam }}" style="{{ r.famStyle }}">{{ r.famLabel }}</button></div></div>
+<div style="font-size:15px">{{ r.meaning }}</div><div style="font-size:15px">{{ r.origin }}</div><div style="font-size:15px;font-weight:700">{{ r.pop }}</div>
+<div style="display:flex;gap:8px"><button onClick="{{ r.onEdit }}" style="font-family:'Fredoka';font-weight:600;font-size:15px;background:#fff;color:#2a2250;border:2px solid #2a2250;border-radius:999px;padding:6px 14px;cursor:pointer">Edit</button><button onClick="{{ r.onRemove }}" style="font-family:'Fredoka';font-weight:600;font-size:15px;background:#fff;color:#c4221a;border:2px solid #c4221a;border-radius:999px;padding:6px 14px;cursor:pointer">Remove</button></div></div>
+</sc-for></div>
+</sc-if>
+
+<sc-if value="{{ isHistory }}">
+<div style="font-family:'Fredoka';font-weight:700;font-size:44px;margin:12px 0 18px">History</div>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
+<sc-for list="{{ hpChips }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button></sc-for>
+<span style="width:20px"></span>
+<sc-for list="{{ hgChips }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button></sc-for></div>
+<sc-if value="{{ noHist }}"><div style="background:#fff;border-radius:28px;padding:36px;text-align:center;font-weight:700;font-size:18px">No completed rounds yet. Finish a round and it will show up here.</div></sc-if>
+<div style="display:grid;gap:12px">
+<sc-for list="{{ hist }}" as="h" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:#fff;border-radius:26px;padding:16px 22px;box-shadow:0 8px 22px rgba(80,50,140,.08)">
+<span style="background:{{ h.color }};color:#fff;font-family:'Fredoka';font-weight:700;font-size:18px;padding:6px 18px;border-radius:999px">{{ h.person }}</span>
+<span style="font-weight:800;background:#f0ecff;padding:6px 16px;border-radius:999px">{{ h.gender }}</span>
+<div style="flex:1;min-width:160px"><div style="font-weight:700;font-size:14px;opacity:.8">{{ h.date }}</div><div style="font-family:'Fredoka';font-weight:700;font-size:28px">Winner: {{ h.winner }}</div></div>
+<button onClick="{{ h.onView }}" style="font-family:'Fredoka';font-weight:600;font-size:18px;color:#fff;background:{{ h.color }};border:none;border-radius:999px;padding:10px 24px;cursor:pointer">View results</button></div>
+</sc-for></div>
+</sc-if>
+
+<sc-if value="{{ isImport }}">
+<div style="font-family:'Fredoka';font-weight:700;font-size:44px;margin:12px 0 18px">Import names</div>
+<div style="background:#fff;border-radius:36px;padding:36px;box-shadow:0 20px 50px rgba(80,50,140,.12);display:grid;gap:18px;max-width:760px">
+<div style="font-size:17px;line-height:1.5">Upload an XLSX or CSV with columns <b>Name, Gender, Meaning, Origin, Popularity</b>. Importing replaces the current list; your rankings and history are kept.</div>
+<input type="file" accept=".xlsx,.csv" onChange="{{ onFile }}" style="font:700 16px 'Nunito';padding:16px;border:3px dashed #a99bff;border-radius:24px;background:#f6f3ff">
+<div><button onClick="{{ loadAttached }}" style="font-family:'Fredoka';font-weight:600;font-size:18px;color:#2a2250;background:#fff;border:2px solid #2a2250;border-radius:999px;padding:10px 24px;cursor:pointer">Use the attached Name_List.xlsx</button></div>
+<div style="font-weight:800;font-size:18px;color:#4b3bc4">{{ importMsg }}</div>
+<div style="font-weight:700">Currently stored: {{ nameCount }} names ({{ boyCount }} boys, {{ girlCount }} girls, including unisex)</div></div>
+</sc-if>
+
+<sc-if value="{{ isSettings }}">
+<div style="font-family:'Fredoka';font-weight:700;font-size:44px;margin:12px 0 18px">Settings</div>
+<div style="display:grid;gap:18px;max-width:760px">
+<div style="background:#fff;border-radius:32px;padding:28px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+<div><div style="font-family:'Fredoka';font-weight:700;font-size:24px">Name list</div><div style="font-weight:600">{{ nameCount }} names stored</div></div>
+<button onClick="{{ goImport }}" style="font-family:'Fredoka';font-weight:600;font-size:18px;color:#fff;background:#6c5ce7;border:none;border-radius:999px;padding:12px 28px;cursor:pointer">Re-import</button></div>
+<div style="background:#fff;border-radius:32px;padding:28px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+<div><div style="font-family:'Fredoka';font-weight:700;font-size:24px">Reset all data</div><div style="font-weight:600">Deletes the name list, in-progress rounds and all history.</div></div>
+<button onClick="{{ askReset }}" style="font-family:'Fredoka';font-weight:600;font-size:18px;color:#fff;background:#d6291f;border:none;border-radius:999px;padding:12px 28px;cursor:pointer">Reset all data</button></div>
+<div style="background:#fff;border-radius:32px;padding:28px;display:grid;gap:14px">
+<div style="font-family:'Fredoka';font-weight:700;font-size:24px">Family &amp; Friends vote</div>
+<div style="font-weight:600;line-height:1.5">{{ famHomeNote }}</div>
+<input type="password" value="{{ adminKey }}" onInput="{{ onAdminKey }}" placeholder="Your admin key (from setup)" style="font:700 18px 'Nunito';padding:14px 20px;border-radius:20px;border:2px solid #d9d2f5;color:#2a2250;outline:none">
+<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button onClick="{{ publish }}" style="font-family:'Fredoka';font-weight:600;font-size:18px;border-radius:999px;padding:12px 26px;cursor:pointer;color:#fff;background:#1fb5a5;border:none">Publish family list</button><span style="font-weight:800;color:#12857a">{{ pubMsg }}</span></div></div></div>
+</sc-if>
+<sc-if value="{{ isFPlay }}">
+<div style="max-width:760px;margin:12px auto 0">
+<div style="display:flex;justify-content:space-between;font-weight:800"><span>{{ fmPos }} of {{ fmTotal }}</span><button onClick="{{ famBackOne }}" style="{{ fmBackStyle }}">← Back</button></div>
+<div style="height:10px;border-radius:99px;background:rgba(42,34,80,.1);margin-top:10px;overflow:hidden"><div style="height:100%;width:{{ fmProgress }}%;background:#1fb5a5;border-radius:99px;transition:width .4s"></div></div>
+<div style="margin-top:28px;border-radius:44px;background:linear-gradient(135deg,#1fb5a5,#1a86c4);color:#fff;text-align:center;padding:48px 24px;box-shadow:0 14px 0 #12857a,0 30px 50px rgba(40,20,90,.22);animation:{{ cardAnim }} .5s both">
+<div style="font-family:'Fredoka';font-weight:700;font-size:clamp(48px,10vw,96px);line-height:1.1;word-break:break-word">{{ cur.name }}</div>
+<div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:18px">
+<span style="background:#fff;color:#2a2250;font-weight:800;border-radius:18px;padding:8px 16px;font-size:16px">{{ cur.meaning }}</span>
+<span style="background:#fff;color:#2a2250;font-weight:800;border-radius:18px;padding:8px 16px;font-size:16px">{{ cur.origin }}</span>
+<span style="background:#fff;color:#2a2250;font-weight:800;border-radius:18px;padding:8px 16px;font-size:16px">{{ cur.pop }}</span></div></div>
+<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:32px">
+<button onClick="{{ pickLove }}" style="font-family:'Fredoka';font-weight:700;font-size:28px;border-radius:999px;padding:18px 20px;cursor:pointer;flex:1;min-width:120px;color:#fff;background:#e8336f;border:none;box-shadow:0 7px 0 #a81a4c" style-active="transform:translateY(5px);box-shadow:0 2px 0 #a81a4c">Love</button>
+<button onClick="{{ pickLike }}" style="font-family:'Fredoka';font-weight:700;font-size:28px;border-radius:999px;padding:18px 20px;cursor:pointer;flex:1;min-width:120px;color:#fff;background:#6c5ce7;border:none;box-shadow:0 7px 0 #4b3bc4" style-active="transform:translateY(5px);box-shadow:0 2px 0 #4b3bc4">Like</button>
+<button onClick="{{ pickPass }}" style="font-family:'Fredoka';font-weight:700;font-size:28px;border-radius:999px;padding:18px 20px;cursor:pointer;flex:1;min-width:120px;color:#2a2250;background:#fff;border:3px solid #2a2250;box-shadow:0 7px 0 #2a2250" style-active="transform:translateY(5px);box-shadow:0 2px 0 #2a2250">Pass</button></div>
+<div style="text-align:center;font-weight:800;margin-top:18px;color:#d6291f">{{ fmMsg }}</div></div></sc-if>
+
+<sc-if value="{{ isFMine }}">
+<div style="max-width:760px;margin:12px auto 0;display:grid;gap:16px;animation:rise .5s both">
+<div style="font-family:'Fredoka';font-weight:700;font-size:clamp(32px,5vw,48px)">Your ranking</div>
+<div style="font-weight:700;opacity:.8">{{ mineDate }}</div>
+<sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+<div style="background:#fff;border-radius:28px;padding:20px 24px;box-shadow:0 8px 22px rgba(80,50,140,.08)">
+<div style="font-family:'Fredoka';font-weight:700;font-size:24px;color:{{ g.color }}">{{ g.title }} · {{ g.count }}</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+<sc-for list="{{ g.names }}" as="n" hint-placeholder-count="0"><span style="font-family:'Fredoka';font-weight:600;font-size:19px;background:#f4f1ff;border-radius:999px;padding:6px 16px">{{ n.name }}</span></sc-for></div></div></sc-for>
+<div style="display:flex;gap:12px;flex-wrap:wrap"><button onClick="{{ openFamResults }}" style="font-family:'Fredoka';font-weight:700;font-size:20px;color:#fff;background:#1fb5a5;border:none;border-radius:999px;padding:14px 28px;cursor:pointer;box-shadow:0 6px 0 #12857a">See everyone's results</button>
+<button onClick="{{ goHome }}" style="font-family:'Fredoka';font-weight:600;font-size:20px;color:#2a2250;background:#fff;border:2px solid #2a2250;border-radius:999px;padding:12px 26px;cursor:pointer">Back</button></div></div></sc-if>
+
+<sc-if value="{{ isFResults }}">
+<div style="margin-top:12px;display:grid;gap:14px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div style="font-family:'Fredoka';font-weight:700;font-size:clamp(32px,5vw,48px)">Family &amp; Friends results</div>
+<button onClick="{{ goFamBack }}" style="font-family:'Fredoka';font-weight:600;font-size:18px;color:#2a2250;background:#fff;border:2px solid #2a2250;border-radius:999px;padding:10px 24px;cursor:pointer">Back</button></div>
+<div style="font-weight:700">{{ voterLine }}</div>
+<div style="display:flex;gap:10px;flex-wrap:wrap"><sc-for list="{{ resChips }}" as="c" hint-placeholder-count="2"><button onClick="{{ c.onClick }}" style="{{ c.style }}">{{ c.label }}</button></sc-for>
+<span style="display:inline-flex;gap:14px;align-items:center;font-weight:800;font-size:14px;margin-left:12px"><span style="color:#e8336f">■ Love</span><span style="color:#6c5ce7">■ Like</span><span style="color:#8a84a8">■ Pass</span></span></div>
+<div style="font-weight:800;color:#d6291f">{{ fmMsg }}</div>
+<div style="display:grid;gap:10px">
+<sc-for list="{{ resRows }}" as="r" hint-placeholder-count="6">
+<div style="display:grid;grid-template-columns:56px minmax(120px,1.1fr) minmax(0,2fr) minmax(0,1.3fr);gap:14px;align-items:center;background:#fff;border-radius:22px;padding:12px 18px;box-shadow:0 6px 18px rgba(80,50,140,.07)">
+<div style="font-family:'Fredoka';font-weight:700;font-size:22px;width:44px;height:44px;border-radius:50%;background:#dff5f2;display:flex;align-items:center;justify-content:center">{{ r.rank }}</div>
+<div><div style="font-family:'Fredoka';font-weight:700;font-size:24px;word-break:break-word">{{ r.name }}</div><div style="font-size:14px">{{ r.meaning }}</div></div>
+<div style="display:flex;height:16px;border-radius:99px;overflow:hidden;background:#ece8f7"><span style="width:{{ r.wLove }}%;background:#e8336f"></span><span style="width:{{ r.wLike }}%;background:#6c5ce7"></span><span style="width:{{ r.wPass }}%;background:#8a84a8"></span></div>
+<div style="font-weight:800;font-size:15px">{{ r.counts }}</div></div></sc-for></div></div></sc-if>
+</div>
+
+<sc-if value="{{ hasModal }}">
+<div style="position:fixed;inset:0;background:rgba(42,34,80,.55);display:flex;align-items:center;justify-content:center;padding:24px;z-index:100">
+<div style="background:#fff;border-radius:36px;padding:36px;max-width:480px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.35);animation:zoom .35s both">
+<div style="font-family:'Fredoka';font-weight:700;font-size:30px">{{ modal.title }}</div>
+<p style="font-size:18px;line-height:1.5;margin:12px 0 26px">{{ modal.body }}</p>
+<div style="display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap">
+<sc-if value="{{ modal.hasCancel }}"><button onClick="{{ closeModal }}" style="font-family:'Fredoka';font-weight:600;font-size:18px;background:#fff;color:#2a2250;border:2px solid #2a2250;border-radius:999px;padding:10px 24px;cursor:pointer">Cancel</button></sc-if>
+<button onClick="{{ confirmModal }}" style="font-family:'Fredoka';font-weight:600;font-size:18px;color:#fff;background:#6c5ce7;border:none;border-radius:999px;padding:10px 26px;cursor:pointer">{{ modal.confirm }}</button></div></div></div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  PINS = { meg: '0182', cathleen: '4377' };
+  P = { Meg: { c: '#e8336f', d: '#a81a4c', c2: '#f0572f', s: '#ffe3ee' }, Cathleen: { c: '#6c5ce7', d: '#4b3bc4', c2: '#1a86c4', s: '#e6e2ff' } };
+  state = (() => {
+    let data = { names: [], rounds: {}, history: [] };
+    try { const x = JSON.parse(localStorage.getItem('nameDuel.v1')); if (x && x.names) data = x; } catch (e) {}
+    const fam = /[?&]family\b/.test(location.search) || location.hash === '#family'; let famUser = null, adminKey = ''; try { famUser = JSON.parse(localStorage.getItem('nameDuel.fam')); adminKey = localStorage.getItem('nameDuel.adminKey') || ''; } catch (e) {}
+    let flag = false; try { flag = localStorage.getItem('nameDuel.owner') === '1'; } catch (e) {} const owner = flag || /[?&]me\b/.test(location.search) || data.names.length > 0; let unl = {};  try { unl = JSON.parse(sessionStorage.getItem('nameDuel.unl')) || {}; } catch (e) {} return { adminOk: false, gateKey: '', gateMsg: '', showAll: false, duelSel: null, unl, pinIn: {}, pinErr: {}, owner, hubErr: '', fam: false, famPreview: false, famUser, adminKey, pubMsg: '', copyMsg: '', famList: null, famAttempts: [], famRes: null, fmName: '', fmPin: '', fmMsg: '', fmBusy: false, fmCards: [], fmIdx: 0, fmPicks: {}, fmView: null, fmGender: 'Boy', data, view: 'home', modal: null, round: null, result: null, confetti: [], anim: 0, phase: 'in', chosen: -1, q: '', sort: 'name', bGender: 'Boy', hP: 'All', hG: 'All', importMsg: '', sh: null, form: null, formMsg: '', filling: false };
+  })();
+
+  componentDidMount() {
+    if (!this.state.data.names.length) this.loadAttached(true);
+    this.hubLoad();
+  }
+  commit(patch, extra = {}) {
+    const data = Object.assign({}, this.state.data, patch);
+    try { localStorage.setItem('nameDuel.v1', JSON.stringify(data)); } catch (e) {}
+    this.setState(Object.assign({ data }, extra));
+  }
+  fmt(d) { return new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) + ', ' + new Date(d).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }); }
+  info(x) { return x ? x : 'Info not available'; }
+  popRank(p) {
+    const m = /top\s*(\d+)|uncommon|rare/i.exec(p || '');
+    if (!m) return 99;
+    if (m[1]) { const i = [10, 50, 100, 250, 500, 1000].indexOf(+m[1]); return i < 0 ? 99 : i; }
+    return /uncommon/i.test(m[0]) ? 6 : 7;
+  }
+  pool(g) { return this.state.data.names.filter(n => n.gender === g || n.gender === 'Both'); }
+  latest(person, g) {
+    const h = this.state.data.history.filter(x => x.person === person && x.gender === g);
+    return h.length ? h.slice().sort((a, b) => b.date.localeCompare(a.date))[0] : null;
+  }
+
+  /* ---------- import ---------- */
+  parseCSV(t) {
+    const rows = []; let r = [], c = '', q = false;
+    for (let i = 0; i < t.length; i++) {
+      const ch = t[i];
+      if (q) { if (ch === '"') { if (t[i + 1] === '"') { c += '"'; i++; } else q = false; } else c += ch; }
+      else if (ch === '"') q = true;
+      else if (ch === ',') { r.push(c); c = ''; }
+      else if (ch === '\n' || ch === '\r') { if (ch === '\r' && t[i + 1] === '\n') i++; r.push(c); rows.push(r); r = []; c = ''; }
+      else c += ch;
+    }
+    if (c || r.length) { r.push(c); rows.push(r); }
+    return rows;
+  }
+  async parseXLSX(buf) {
+    const u = new Uint8Array(buf), dv = new DataView(buf);
+    let e = u.length - 22;
+    while (e > 0 && dv.getUint32(e, true) !== 0x06054b50) e--;
+    const n = dv.getUint16(e + 10, true); let p = dv.getUint32(e + 16, true); const files = {};
+    for (let i = 0; i < n; i++) {
+      const m = dv.getUint16(p + 10, true), cs = dv.getUint32(p + 20, true), nl = dv.getUint16(p + 28, true), xl = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true), off = dv.getUint32(p + 42, true);
+      files[new TextDecoder().decode(u.subarray(p + 46, p + 46 + nl))] = { m, cs, off };
+      p += 46 + nl + xl + cl;
+    }
+    const get = async (name) => {
+      const f = files[name]; if (!f) return null;
+      const s = f.off + 30 + dv.getUint16(f.off + 26, true) + dv.getUint16(f.off + 28, true);
+      const d = u.slice(s, s + f.cs);
+      if (f.m === 0) return new TextDecoder().decode(d);
+      return await new Response(new Blob([d]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text();
+    };
+    const parse = (x) => new DOMParser().parseFromString(x, 'application/xml');
+    const txt = (el) => Array.from(el.getElementsByTagName('t')).map(t => t.textContent).join('');
+    const ss = await get('xl/sharedStrings.xml');
+    const shared = ss ? Array.from(parse(ss).getElementsByTagName('si')).map(txt) : [];
+    const sheetName = Object.keys(files).filter(k => /^xl\/worksheets\/sheet\d+\.xml$/.test(k)).sort()[0];
+    const doc = parse(await get(sheetName));
+    const rows = [];
+    Array.from(doc.getElementsByTagName('row')).forEach(row => {
+      const arr = [];
+      Array.from(row.getElementsByTagName('c')).forEach(c => {
+        const ref = c.getAttribute('r') || ''; const letters = ref.replace(/\d+/g, '');
+        let col = 0; for (const ch of letters) col = col * 26 + ch.charCodeAt(0) - 64;
+        const t = c.getAttribute('t'); let v = '';
+        if (t === 'inlineStr') v = txt(c);
+        else { const ve = c.getElementsByTagName('v')[0]; v = ve ? ve.textContent : ''; if (t === 's') v = shared[+v] || ''; }
+        arr[col - 1] = v;
+      });
+      rows.push(arr);
+    });
+    return rows;
+  }
+  importRows(rows, label, silent) {
+    const clean = rows.map(r => Array.from(r, c => (c == null ? '' : String(c)).trim()));
+    const head = (clean[0] || []).map(h => h.toLowerCase());
+    const ix = (k, d) => { const i = head.indexOf(k); return i < 0 ? d : i; };
+    const iN = ix('name', 0), iG = ix('gender', 1), iM = ix('meaning', 2), iO = ix('origin', 3), iP = ix('popularity', 4);
+    const map = new Map();
+    clean.slice(1).forEach(r => {
+      const name = r[iN]; if (!name) return;
+      const gl = (r[iG] || '').toLowerCase();
+      const g = /both|unisex|either/.test(gl) ? 'Both' : /^(boy|male|m\b)/.test(gl) ? 'Boy' : /^(girl|female|f\b)/.test(gl) ? 'Girl' : 'Both';
+      const rec = { name, gender: g, meaning: r[iM] || '', origin: r[iO] || '', pop: r[iP] || '' };
+      const k = name.toLowerCase(); const ex = map.get(k);
+      if (!ex) map.set(k, rec);
+      else {
+        if (ex.gender !== rec.gender) ex.gender = 'Both';
+        ['meaning', 'origin', 'pop'].forEach(f => { if (!ex[f]) ex[f] = rec[f]; });
+      }
+    });
+    const old = new Map(this.state.data.names.map(n => [n.name.toLowerCase(), n.fam])); const names = Array.from(map.values()); names.forEach(n => { if (old.get(n.name.toLowerCase())) n.fam = true; });
+    if (!names.length) { this.setState({ importMsg: 'No names found. Check the column headings.' }); return; }
+    this.commit({ names }, { importMsg: 'Imported ' + names.length + ' unique names from ' + label + '.' });
+  }
+  async handleFile(file) {
+    try {
+      const rows = /\.csv$/i.test(file.name) ? this.parseCSV(await file.text()) : await this.parseXLSX(await file.arrayBuffer());
+      this.importRows(rows, file.name);
+    } catch (e) { this.setState({ importMsg: 'Could not read that file.' }); }
+  }
+  async loadAttached(silent) {
+    try {
+      const res = await fetch('uploads/Name_List.xlsx'); if (!res.ok) throw 0;
+      this.importRows(await this.parseXLSX(await res.arrayBuffer()), 'Name_List.xlsx', silent);
+    } catch (e) { if (!silent) this.setState({ importMsg: 'Attached file not found. Please upload it.' }); }
+  }
+
+  /* ---------- names editing ---------- */
+  setF(k, v) { this.setState({ form: Object.assign({}, this.state.form, { [k]: v }) }); }
+  saveForm() {
+    const f = this.state.form, name = f.name.trim(); if (!name) { this.setState({ formMsg: 'Please enter a name.' }); return; }
+    const names = this.state.data.names.slice();
+    const dup = names.findIndex(n => n.name.toLowerCase() === name.toLowerCase());
+    if (dup >= 0 && dup !== f.idx) { this.setState({ formMsg: name + ' is already in the list.' }); return; }
+    const rec = { name, gender: f.gender, meaning: f.meaning.trim(), origin: f.origin.trim(), pop: f.pop.trim() };
+    if (f.idx >= 0 && names[f.idx].fam) rec.fam = true;
+    if (f.idx >= 0) names[f.idx] = rec; else names.push(rec);
+    this.commit({ names }, { form: null, formMsg: '' });
+  }
+  removeName(n) {
+    this.setState({ modal: { title: 'Remove ' + n.name + '?', body: 'It will leave the list. Past rankings and history are kept.', confirm: 'Remove', hasCancel: true, onConfirm: () => this.commit({ names: this.state.data.names.filter(x => x.name !== n.name) }) } });
+  }
+  async autoFill() {
+    const f = this.state.form, name = (f.name || '').trim();
+    if (!name) { this.setState({ formMsg: 'Type a name first.' }); return; }
+    if (!(window.claude && window.claude.complete)) { this.setState({ formMsg: 'Auto-fill is only available inside the design tool. Please type the details in.' }); return; }
+    this.setState({ filling: true, formMsg: '' });
+    try {
+      const g = f.gender === 'Both' ? 'unisex' : f.gender.toLowerCase();
+      const out = await window.claude.complete('Baby name: "' + name + '" (' + g + '). Reply with ONLY compact JSON: {"meaning":"short meaning, max 8 words","origin":"language of origin, 1-2 words","popularity":"one of: Top 10, Top 50, Top 100, Top 250, Top 500, Top 1000, Uncommon, Rare (US baby-name popularity, best estimate)"}. Use "" for anything you do not know.');
+      const j = JSON.parse(out.slice(out.indexOf('{'), out.lastIndexOf('}') + 1));
+      const cur = this.state.form;
+      this.setState({ filling: false, form: Object.assign({}, cur, { meaning: cur.meaning.trim() || j.meaning || '', origin: cur.origin.trim() || j.origin || '', pop: cur.pop.trim() || j.popularity || '' }) });
+    } catch (e) { this.setState({ filling: false, formMsg: 'Could not look that up (' + ((e && e.message) || e) + '). You can type the details in.' }); }
+  }
+  changes(person, g) {
+    const last = this.latest(person, g); if (!last) return null;
+    const cur = new Set(this.pool(g).map(n => n.name)), old = new Set(last.ranking.map(r => r.name));
+    return { added: [...cur].filter(n => !old.has(n)).length, removed: [...old].filter(n => !cur.has(n)).length };
+  }
+
+  /* ---------- family & friends ---------- */
+  famCfg() { const c = window.NAME_DUEL_CONFIG || {}; return c.url && c.key && !/YOUR_/.test(c.url + c.key) ? c : null; }
+  async rpc(fn, args) {
+    const c = this.famCfg(); if (!c) throw new Error('not-configured');
+    const r = await fetch(c.url + '/rest/v1/rpc/' + fn, { method: 'POST', headers: Object.assign({ apikey: c.key, 'Content-Type': 'application/json' }, /^eyJ/.test(c.key) ? { Authorization: 'Bearer ' + c.key } : {}), body: JSON.stringify(args || {}) });
+    if (!r.ok) { let m = ''; try { m = (await r.json()).message; } catch (e) {} throw new Error(m || 'HTTP ' + r.status); }
+    const t = await r.text(); return t ? JSON.parse(t) : null;
+  }
+  async hash(name, pin) { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(name.trim().toLowerCase() + '|' + pin)); return Array.from(new Uint8Array(b), x => x.toString(16).padStart(2, '0')).join(''); }
+  famErr(e) { const m = (e && e.message) || ''; return m === 'not-configured' ? 'The family vote is not set up yet.' : 'Something went wrong: ' + m; }
+  async famLoad() {
+    const u = this.state.famUser;
+    const [list, att] = await Promise.all([this.rpc('family_get_list'), u ? this.rpc('family_my_attempts', { p_person: u.name, p_hash: u.hash }) : Promise.resolve([])]);
+    this.setState({ famList: list || [], famAttempts: att || [] });
+  }
+  async hubLoad() {
+    try { const u = this.state.famUser; const [list, att, res, duel] = await Promise.all([this.rpc('family_get_list'), u ? this.rpc('family_my_attempts', { p_person: u.name, p_hash: u.hash }) : Promise.resolve([]), this.rpc('family_results'), this.rpc('duel_get').catch(() => undefined)]); this.setState({ famList: list || [], famAttempts: att || [], famRes: res || [], duel: duel === undefined ? null : (duel || {}), duelOk: duel !== undefined, hubErr: '' }); if ((this.state.adminKey || '').trim()) this.schedulePub(); }
+    catch (e) { this.setState({ hubErr: (e && e.message) === 'not-configured' ? 'setup' : this.famErr(e) }); }
+  }
+  duelStatus() {
+    const d = this.state.data, out = {};
+    ['Meg', 'Cathleen'].forEach(pn => { out[pn] = {}; ['Boy', 'Girl'].forEach(g => { const r = d.rounds[pn + '|' + g], last = this.latest(pn, g); out[pn][g] = { state: r ? 'going' : last ? 'done' : 'none', left: r ? r.queue.length + r.current.length : 0, total: r ? Object.keys(r.stats).length : 0, date: last ? last.date : '', top: last ? last.ranking.slice(0, 5).map(x => x.name) : [], ranking: last ? last.ranking.map(x => ({ n: x.name, w: x.wins, m: x.meaning || '' })) : [] }; }); });
+    return out;
+  }
+  schedulePub() { clearTimeout(this._pt); this._pt = setTimeout(() => { const s = this.state, key = (s.adminKey || '').trim(); if (!key || !this.famCfg()) return; this.rpc('duel_publish', { p_key: key, p_status: this.duelStatus() }).catch(() => {}); }, 900); }
+  async famEnter() { await this.hubLoad(); this.setState({ view: 'home', fmMsg: '' }); }
+  becomeOwner() { try { localStorage.setItem('nameDuel.owner', '1'); } catch (e) {} this.setState({ owner: true }); if (!this.state.data.names.length) this.loadAttached(true); }
+  async famLogin() {
+    const s = this.state, name = s.fmName.trim(), pin = '';
+    if (!name) { this.setState({ fmMsg: 'Please enter your name.' }); return; }
+    this.setState({ fmBusy: true, fmMsg: '' });
+    try {
+      const hash = await this.hash(name, pin), r = await this.rpc('family_login', { p_person: name, p_hash: hash });
+      if (r === 'bad') { this.setState({ fmBusy: false, fmMsg: 'That name is already taken. Try adding your last initial.' }); return; }
+      const u = { name, hash }; try { localStorage.setItem('nameDuel.fam', JSON.stringify(u)); } catch (e) {}
+      this.setState({ famUser: u }, async () => { await this.hubLoad(); this.setState({ fmBusy: false, fmPin: '', fmMsg: '' }); });
+    } catch (e) { this.setState({ fmBusy: false, fmMsg: this.famErr(e) }); }
+  }
+  famSignOut() { try { localStorage.removeItem('nameDuel.fam'); } catch (e) {} this.setState({ famUser: null, famAttempts: [], fmName: '', fmPin: '', fmMsg: '', view: 'home' }); this.hubLoad(); }
+  startPlay() {
+    const cards = (this.state.famList || []).slice();
+    if (!cards.length) { this.setState({ fmMsg: 'No names have been shared yet. Check back soon!' }); return; }
+    for (let i = cards.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [cards[i], cards[j]] = [cards[j], cards[i]]; }
+    this.setState({ fmCards: cards, fmIdx: 0, fmPicks: {}, fmMsg: '', view: 'fPlay', anim: this.state.anim + 1 });
+  }
+  async famPick(level) {
+    const s = this.state; if (s.fmBusy) return;
+    const n = s.fmCards[s.fmIdx], picks = Object.assign({}, s.fmPicks, { [n.name]: level });
+    if (s.fmIdx + 1 < s.fmCards.length) { this.setState({ fmPicks: picks, fmIdx: s.fmIdx + 1, anim: s.anim + 1, fmMsg: '' }); return; }
+    this.setState({ fmPicks: picks, fmBusy: true, fmMsg: 'Saving…' });
+    try {
+      await this.rpc('family_submit', { p_person: s.famUser.name, p_hash: s.famUser.hash, p_picks: picks });
+      await this.famLoad();
+      this.setState({ view: 'fMine', fmView: this.state.famAttempts[0], fmBusy: false, fmMsg: '' }); this.confetti();
+    } catch (e) { this.setState({ fmBusy: false, fmMsg: this.famErr(e) + ' Tap an answer again to retry.' }); }
+  }
+  famBackOne() { const s = this.state; if (s.fmIdx > 0 && !s.fmBusy) this.setState({ fmIdx: s.fmIdx - 1, anim: s.anim + 1, fmMsg: '' }); }
+  async loadResults() {
+    this.setState({ famRes: null, fmMsg: 'Loading…' });
+    try { const [res, list] = await Promise.all([this.rpc('family_results'), this.rpc('family_get_list')]); this.setState({ famRes: res || [], famList: list || [], fmMsg: '' }); }
+    catch (e) { this.setState({ fmMsg: this.famErr(e) }); }
+  }
+  openFamResults() { this.setState({ view: 'fResults' }); this.loadResults(); }
+  toggleFam(n) { this.commit({ names: this.state.data.names.map(x => x.name === n.name ? Object.assign({}, x, { fam: !x.fam }) : x) }); }
+  async publish() {
+    const key = this.state.adminKey.trim(), names = this.state.data.names.filter(n => n.fam).map(n => ({ name: n.name, gender: n.gender, meaning: n.meaning, origin: n.origin, pop: n.pop }));
+    if (!key) { this.setState({ pubMsg: 'Enter your admin key first.' }); return; }
+    if (!names.length) { this.setState({ pubMsg: 'Pick some names in the Names tab first.' }); return; }
+    try { await this.rpc('family_publish', { p_key: key, p_names: names }); try { localStorage.setItem('nameDuel.adminKey', key); } catch (e) {} this.setState({ pubMsg: 'Published ' + names.length + ' names.' }); }
+    catch (e) { this.setState({ pubMsg: this.famErr(e) }); }
+  }
+  async copyLink() {
+    const url = location.href.split(/[?#]/)[0].replace(/index\.html$/, '') + '?family';
+    try { await navigator.clipboard.writeText(url); this.setState({ copyMsg: 'Copied: ' + url }); } catch (e) { this.setState({ copyMsg: 'Share this link: ' + url }); }
+  }
+  famVals() {
+    const s = this.state, list = s.famList || [], cur = s.fmCards[s.fmIdx] || {}, v = s.view, u = s.famUser;
+    const info = (x) => x ? x : 'Info not available';
+    const famCount = s.data.names.filter(n => n.fam).length;
+    const chipSt = (on) => "font-family:'Fredoka';font-weight:600;font-size:17px;border-radius:999px;padding:10px 22px;cursor:pointer;border:2px solid " + (on ? '#2a2250' : 'transparent') + ';background:' + (on ? '#2a2250' : '#fff') + ';color:' + (on ? '#fff' : '#2a2250');
+    const res = s.famRes || [];
+    const rows = list.filter(n => n.gender === s.fmGender || n.gender === 'Both').map(n => {
+      let lo = 0, li = 0, pa = 0; res.forEach(r => { const p = r.picks[n.name]; if (p === 'love') lo++; else if (p === 'like') li++; else if (p === 'pass') pa++; });
+      const t = lo + li + pa; return { n, lo, li, pa, t, score: t ? (2 * lo + li) / t : -1 };
+    }).sort((a, b) => b.score - a.score || b.lo - a.lo || a.n.name.localeCompare(b.n.name));
+    const pct = (x, t) => t ? Math.round(x / t * 100) : 0;
+    const mine = s.fmView;
+    const rankG = (g) => list.filter(n => n.gender === g || n.gender === 'Both').map(n => { let lo = 0, li = 0, pa = 0; res.forEach(r => { const p = r.picks[n.name]; if (p === 'love') lo++; else if (p === 'like') li++; else if (p === 'pass') pa++; }); const t = lo + li + pa; return { n, lo, li, pa, t, score: t ? (2 * lo + li) / t : -1 }; }).filter(r => r.t).sort((a, b) => b.score - a.score || b.lo - a.lo || a.n.name.localeCompare(b.n.name));
+    const tops = ['Boy', 'Girl'].map(g => ({ title: g + 's', isBoy: g === 'Boy', isGirl: g === 'Girl', rows: rankG(g).slice(0, 4).map((r, i) => ({ rank: i + 1, name: r.n.name, wLove: pct(r.lo, r.t), wLike: pct(r.li, r.t), wPass: pct(r.pa, r.t), counts: r.lo + ' love · ' + r.li + ' like · ' + r.pa + ' pass' })) })).filter(t => t.rows.length);
+    const voters = s.famRes ? s.famRes.map(r => r.person) : [], vcol = ['#e8336f', '#6c5ce7', '#ff8a3d', '#1a86c4', '#d9531e', '#128a47'];
+    const dget = (pn, g) => ((s.duel || {})[pn] || {})[g];
+    const rk = (pn, name) => { const x = dget(pn, 'Boy'), y = dget(pn, 'Girl'), r = (s.fmGender === 'Boy' ? x : y); const i = r && r.ranking ? r.ranking.findIndex(z => z.n === name) : -1; return i < 0 ? '—' : '#' + (i + 1); };
+    const shared = (() => { const a = dget('Meg', s.fmGender), b = dget('Cathleen', s.fmGender); if (!a || !b || a.state !== 'done' || b.state !== 'done' || !a.ranking.length || !b.ranking.length) return null; const mk = (r) => { const N = r.length, mx = Math.max(1, ...r.map(x => x.w)), m = {}; r.forEach((x, i) => { m[x.n] = 0.6 * x.w / mx + 0.4 * (N > 1 ? 1 - i / (N - 1) : 1) + 0.01; }); return m; }; const A = mk(a.ranking), B = mk(b.ranking); const c = Object.keys(A).filter(n => B[n]).sort((x, y) => Math.sqrt(B[y] * A[y]) - Math.sqrt(B[x] * A[x])); return c[0] || null; })();
+    const dsel = s.duelSel ? { p: s.duelSel.p, g: s.duelSel.g, e: dget(s.duelSel.p, s.duelSel.g) } : null;
+    const setup = s.hubErr === 'setup', hubReady = !!s.famRes && !s.hubErr;
+    return {
+      isDuels: v === 'duels', isGate: v === 'gate', isDuelRes: v === 'duelRes' && !!dsel && !!dsel.e, famTotal: list.length,
+      adminHint: !(s.adminKey || '').trim() && !!this.famCfg(),
+      openManage: () => s.adminOk ? this.setState({ view: 'browse' }) : this.setState({ view: 'gate', gateMsg: '', gateKey: '' }),
+      gateKey: s.gateKey, gateMsg: s.gateMsg, onGateKey: (e) => this.setState({ gateKey: e.target.value }),
+      gateGo: () => { const key = s.gateKey.trim(); let st = ''; try { st = localStorage.getItem('nameDuel.adminKey') || ''; } catch (e) {} if (!key) { this.setState({ gateMsg: 'Enter the admin key.' }); return; } if (st && st !== key) { this.setState({ gateMsg: 'That admin key is not right.' }); return; } try { localStorage.setItem('nameDuel.adminKey', key); } catch (e) {} this.setState({ adminKey: key, adminOk: true, view: 'browse', gateMsg: '' }); this.schedulePub(); },
+      statusCols: ['Meg', 'Cathleen'].map(pn => ({ name: pn, color: pn === 'Meg' ? '#b81f52' : '#4b3bc4', soft: pn === 'Meg' ? '#ffe3ee' : '#e6e2ff', rows: ['Boy', 'Girl'].map(g => { const x = dget(pn, g) || { state: 'none' }; const done = x.state === 'done' && !!(x.ranking && x.ranking.length); return { isBoy: g === 'Boy', isGirl: g === 'Girl', label: g + 's', status: x.state === 'done' ? 'finished' : x.state === 'going' ? x.left + ' of ' + x.total + ' left' : 'not started yet', done, winner: done ? x.ranking[0].n : '', onView: () => this.setState({ view: 'duelRes', duelSel: { p: pn, g } }) }; }) })),
+      showShared: !!shared, sharedWho: "Meg & Cathleen's shared " + (s.fmGender === 'Boy' ? 'boy' : 'girl') + ' pick', sharedName: shared || '', sharedNote: 'Both finished ' + (s.fmGender === 'Boy' ? 'boys' : 'girls') + ', so it is revealed.',
+      boardRows: rows.slice(0, s.showAll ? 999 : 5).map((r, i) => ({ rank: i + 1, name: r.n.name, meaning: info(r.n.meaning), love: pct(r.lo, r.t), like: pct(r.li, r.t), pass: pct(r.pa, r.t), counts: r.t ? r.lo + ' love · ' + r.li + ' like · ' + r.pa + ' pass' : 'No votes yet', meg: rk('Meg', r.n.name), cath: rk('Cathleen', r.n.name) })),
+      hasMore: rows.length > 5, moreLabel: s.showAll ? 'Show fewer' : 'Show all ' + rows.length + (s.fmGender === 'Boy' ? ' boys' : ' girls'), toggleMore: () => this.setState({ showAll: !s.showAll }),
+      dr: dsel && dsel.e ? { grad: 'linear-gradient(135deg,' + this.P[dsel.p].c + ',' + this.P[dsel.p].c2 + ')', soft: this.P[dsel.p].s, line: dsel.p + "'s favourite " + (dsel.g === 'Boy' ? 'boy' : 'girl') + ' name is', winner: dsel.e.ranking[0].n, date: dsel.e.date ? 'Finished ' + this.fmt(dsel.e.date) : '', rows: dsel.e.ranking.slice(1).map((x, i) => ({ rank: i + 2, name: x.n, wins: x.w, meaning: info(x.m) })) } : {},
+      goBrowse: () => this.setState({ view: 'browse' }), goSettings: () => this.setState({ view: 'settings' }),
+      hubErr: setup ? '' : s.hubErr, showSetup: setup, showOtherErr: !!s.hubErr && !setup, showAuth: !setup && !u, showMe: !setup && !!u, showBoard: hubReady, hasVotes: tops.length > 0, noVotesYet: tops.length === 0, tops,
+      famCountLabel: list.length + (list.length === 1 ? ' name' : ' names') + ' to rate', voterCountLabel: voters.length + (voters.length === 1 ? ' voter' : ' voters') + ' so far', hasVoters: voters.length > 0,
+      voterChips: voters.slice(0, 10).map((n, i) => ({ name: n, initial: n[0].toUpperCase(), style: "width:36px;height:36px;border-radius:50%;background:" + vcol[i % vcol.length] + ";color:#fff;border:2px solid #fff;display:inline-flex;align-items:center;justify-content:center;font-family:'Fredoka';font-weight:700;font-size:18px" })), voterMore: voters.length > 10 ? '+' + (voters.length - 10) + ' more' : '',
+      viewLast: () => this.setState({ view: 'fMine', fmView: s.famAttempts[0] }),
+      isFPlay: v === 'fPlay' && !!cur.name, isFMine: v === 'fMine' && !!mine, isFResults: v === 'fResults',
+      fmName: s.fmName, fmPin: s.fmPin, fmMsg: s.fmMsg, onFmName: (e) => this.setState({ fmName: e.target.value }), onFmPin: (e) => this.setState({ fmPin: e.target.value }),
+      famLogin: () => this.famLogin(), fmBtn: s.fmBusy ? 'One moment…' : "Let's go",
+      famName: u ? u.name : '', famSignOut: () => this.famSignOut(), startPlay: () => this.startPlay(), startLabel: s.famAttempts.length ? 'Start a new ranking' : 'Start my ranking',
+      hasAttempts: s.famAttempts.length > 0,
+      attempts: s.famAttempts.map((a, i) => ({ date: this.fmt(a.created_at), tag: i === 0 ? '· Latest' : '', loves: Object.keys(a.picks).filter(k => a.picks[k] === 'love').slice(0, 4).join(', ') || 'none', onView: () => this.setState({ view: 'fMine', fmView: a }) })),
+      cur: { name: cur.name || '', meaning: info(cur.meaning), origin: info(cur.origin), pop: info(cur.pop) }, cardAnim: s.anim % 2 ? 'popB' : 'popA',
+      fmPos: s.fmIdx + 1, fmTotal: s.fmCards.length, fmProgress: Math.round(s.fmIdx / Math.max(1, s.fmCards.length) * 100),
+      fmBackStyle: "font-family:'Fredoka';font-weight:600;font-size:16px;border-radius:999px;padding:6px 18px;border:2px solid #2a2250;background:#fff;color:#2a2250;cursor:pointer;opacity:" + (s.fmIdx > 0 ? 1 : .4),
+      famBackOne: () => this.famBackOne(), pickLove: () => this.famPick('love'), pickLike: () => this.famPick('like'), pickPass: () => this.famPick('pass'),
+      mineDate: mine ? 'Saved ' + this.fmt(mine.created_at) : '',
+      groups: mine ? [['love', 'Love', '#e8336f'], ['like', 'Like', '#6c5ce7'], ['pass', 'Pass', '#8a84a8']].map(([k, t, c]) => { const ns = Object.keys(mine.picks).filter(n => mine.picks[n] === k).sort(); return { title: t, color: c, count: ns.length, names: ns.map(name => ({ name })) }; }) : [],
+      openFamResults: () => this.openFamResults(), goFamBack: () => this.setState({ view: s.fam ? (u ? 'fHome' : 'fLogin') : 'home' }),
+      voterLine: res.length ? res.length + (res.length === 1 ? ' person has' : ' people have') + ' voted: ' + res.map(r => r.person).join(', ') : (s.fmMsg ? '' : 'No votes yet.'),
+      resChips: [['Boy', 'Boys'], ['Girl', 'Girls']].map(([k, l]) => ({ label: l, onClick: () => this.setState({ fmGender: k }), style: chipSt(s.fmGender === k) })),
+      resRows: rows.map((r, i) => ({ rank: i + 1, name: r.n.name, meaning: info(r.n.meaning), wLove: pct(r.lo, r.t), wLike: pct(r.li, r.t), wPass: pct(r.pa, r.t), counts: r.t ? 'Love ' + r.lo + ' · Like ' + r.li + ' · Pass ' + r.pa : 'No votes yet' })),
+      famHomeNote: famCount + (famCount === 1 ? ' name is' : ' names are') + ' open for family vote. Choose them with the star in the Names tab, then publish in Settings.',
+      copyLink: () => this.copyLink(), copyMsg: s.copyMsg, previewFam: () => { this.setState({ fam: true, famPreview: true, view: u ? 'fHome' : 'fLogin' }); if (u) this.famEnter(); },
+      adminKey: s.adminKey, onAdminKey: (e) => this.setState({ adminKey: e.target.value }), publish: () => this.publish(), pubMsg: s.pubMsg
+    };
+  }
+
+  /* ---------- round ---------- */
+  begin(person, g) {
+    const r = this.state.data.rounds[person + '|' + g];
+    if (r) { this.setState({ round: r, view: 'round', phase: 'in', chosen: -1, anim: this.state.anim + 1 }); return; }
+    if (this.latest(person, g)) {
+      this.setState({ modal: { title: 'Start again?', body: 'Going through this again will update your current name ranking. Your previous results will be saved in History.', confirm: 'Continue', hasCancel: true, onConfirm: () => this.startRound(person, g) } });
+    } else this.startRound(person, g);
+  }
+  startRound(person, g) {
+    const names = this.pool(g).map(n => n.name);
+    if (names.length < 2) { this.setState({ modal: { title: 'Not enough names', body: 'You need at least 2 names in this list.', confirm: 'OK', hasCancel: false } }); return; }
+    for (let i = names.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [names[i], names[j]] = [names[j], names[i]]; }
+    const stats = {}; names.forEach(n => stats[n] = { w: 0, l: 0, e: 0 });
+    const round = { person, gender: g, queue: names.slice(2), stats, elim: 0, current: names.slice(0, 2), prev: null };
+    this.saveRound(round);
+    this.setState({ round, view: 'round', phase: 'in', chosen: -1, anim: this.state.anim + 1 });
+  }
+  saveRound(round) {
+    const rounds = Object.assign({}, this.state.data.rounds); rounds[round.person + '|' + round.gender] = round;
+    this.commit({ rounds }); this.schedulePub();
+  }
+  pick(i) {
+    if (this.state.phase !== 'in') return;
+    this.setState({ phase: 'out', chosen: i });
+    setTimeout(() => this.applyPick(i), 800);
+  }
+  applyPick(i) {
+    const r = JSON.parse(JSON.stringify(this.state.round));
+    const a = r.current[0], b = r.current[1], w = r.current[i], l = r.current[1 - i];
+    r.stats[w].w++; r.stats[l].l++;
+    const ins = (n) => { const h = Math.ceil(r.queue.length / 2), k = h + Math.floor(Math.random() * (r.queue.length - h + 1)); r.queue.splice(k, 0, n); return k; };
+    const pw = ins(w); let pl = -1, el = false;
+    if (r.stats[l].l >= 2) { r.stats[l].e = ++r.elim; el = true; } else pl = ins(l);
+    r.log = (r.log || []).concat([{ a, b, w, l, pw, pl, el }]);
+    if (r.queue.length === 1) { r.current = [r.queue[0]]; r.queue = []; this.finish(r); return; }
+    r.current = [r.queue.shift(), r.queue.shift()];
+    this.saveRound(r);
+    this.setState({ round: r, phase: 'in', chosen: -1, anim: this.state.anim + 1 });
+  }
+  undo() {
+    if (this.state.phase !== 'in' || !this.state.round) return;
+    const r = JSON.parse(JSON.stringify(this.state.round)); const L = (r.log || []).pop(); if (!L) return;
+    r.queue.unshift(...r.current);
+    if (L.pl >= 0) r.queue.splice(L.pl, 1);
+    r.queue.splice(L.pw, 1);
+    r.stats[L.w].w--; r.stats[L.l].l--;
+    if (L.el) { r.stats[L.l].e = 0; r.elim--; }
+    r.current = [L.a, L.b];
+    this.saveRound(r);
+    this.setState({ round: r, phase: 'in', chosen: -1, anim: this.state.anim + 1 });
+  }
+  finish(r) {
+    const win = r.current[0];
+    const nm = Object.fromEntries(this.state.data.names.map(n => [n.name, n]));
+    const order = Object.keys(r.stats).filter(n => n !== win).sort((a, b) => r.stats[b].w - r.stats[a].w || r.stats[b].e - r.stats[a].e);
+    const ranking = [win].concat(order).map(n => ({ name: n, wins: r.stats[n].w, losses: r.stats[n].l, meaning: (nm[n] || {}).meaning || '', origin: (nm[n] || {}).origin || '', pop: (nm[n] || {}).pop || '' }));
+    const entry = { id: Date.now() + '', person: r.person, gender: r.gender, date: new Date().toISOString(), winner: win, ranking };
+    const rounds = Object.assign({}, this.state.data.rounds); delete rounds[r.person + '|' + r.gender];
+    this.commit({ rounds, history: this.state.data.history.concat([entry]) }, { round: null, view: 'result', result: Object.assign({ celebrate: true }, entry) });
+    this.confetti(); this.schedulePub();
+  }
+  confetti() {
+    const cols = ['#e8336f', '#6c5ce7', '#ffd23f', '#1fb5a5', '#ff8a3d', '#38a3f5'];
+    const arr = Array.from({ length: 90 }, (_, i) => ({ style: `position:fixed;z-index:90;pointer-events:none;left:${Math.random() * 100}%;top:-20px;width:${8 + Math.random() * 8}px;height:${10 + Math.random() * 12}px;background:${cols[i % cols.length]};border-radius:2px;animation:fall ${2.8 + Math.random() * 2.5}s ${Math.random() * 1.2}s linear forwards` }));
+    this.setState({ confetti: arr });
+    clearTimeout(this._ct); this._ct = setTimeout(() => this.setState({ confetti: [] }), 7000);
+  }
+
+  /* ---------- shared ---------- */
+  computeShared(g) {
+    const a = this.latest('Meg', g), b = this.latest('Cathleen', g); if (!a || !b) return null;
+    const mk = (h) => {
+      const N = h.ranking.length, mx = Math.max(1, ...h.ranking.map(r => r.wins)), m = {};
+      h.ranking.forEach((r, i) => { const rk = i + 1, ws = r.wins / mx, rs = N > 1 ? 1 - (rk - 1) / (N - 1) : 1; m[r.name] = { rk, sc: 0.6 * ws + 0.4 * rs + 0.01, r }; });
+      return m;
+    };
+    const A = mk(a), B = mk(b);
+    return Object.keys(A).filter(n => B[n]).map(n => ({ name: n, ra: A[n].rk, rb: B[n].rk, score: Math.sqrt(A[n].sc * B[n].sc), sum: A[n].sc + B[n].sc, best: Math.min(A[n].rk, B[n].rk), info: A[n].r }))
+      .sort((x, y) => y.score - x.score || y.sum - x.sum || x.best - y.best);
+  }
+  openShared(g) { this.setState({ view: 'shared', sh: { g, phase: 'idle', shuffle: '', status: '' } }); }
+  startReveal() {
+    const rows = this.computeShared(this.state.sh.g); if (!rows) return;
+    const names = rows.slice(0, 12).map(r => r.name); let i = 0;
+    const alive = () => this.state.view === 'shared' && this.state.sh && this.state.sh.phase === 'drum';
+    const set = (o) => this.setState({ sh: Object.assign({}, this.state.sh, o) });
+    set({ phase: 'drum', status: 'Drumroll…', shuffle: names[0] });
+    const step = () => {
+      if (!alive()) return;
+      if (i < 16) { set({ shuffle: names[Math.floor(Math.random() * names.length)] }); setTimeout(step, 70 + i * i * 2.2); i++; }
+      else count(3);
+    };
+    const count = (c) => {
+      if (!alive()) return;
+      if (c === 0) { set({ phase: 'reveal' }); this.confetti(); return; }
+      set({ status: 'Almost there…', shuffle: String(c) }); setTimeout(() => count(c - 1), 850);
+    };
+    setTimeout(step, 600);
+  }
+  letters(name, anim, color) {
+    return Array.from(name).map((ch, i) => ({ ch: ch === ' ' ? '\u00a0' : ch, style: anim ? `display:inline-block;animation:bounce 1.3s ${i * 0.09}s infinite ease-in-out` : 'display:inline-block' }));
+  }
+
+  renderVals() {
+    const s = this.state, d = s.data, P = this.P, v = s.view;
+    const go = (view) => () => { this.setState({ view, sh: null, confetti: [] }); if (view === 'home') this.hubLoad(); };
+    const chip = (label, on, fn, color) => ({ label, onClick: fn, style: `white-space:nowrap;font-family:'Fredoka';font-weight:600;font-size:17px;border-radius:999px;padding:10px 22px;cursor:pointer;border:2px solid ${on ? (color || '#2a2250') : 'transparent'};background:${on ? (color || '#2a2250') : '#fff'};color:${on ? '#fff' : '#2a2250'}` });
+    const navDefs = [['Home', 'home'], ['History', 'history'], ['Names', 'browse'], ['Settings', 'settings']];
+    const nav = v === 'home' ? [chip("🔒 Meg & Cathleen's duels", false, go('duels'))] : ['browse', 'settings', 'import'].includes(v) ? [chip('Home', false, go('home')), chip('Names', v === 'browse', go('browse')), chip('Settings', v === 'settings', go('settings'))] : ['duels', 'history', 'round', 'result', 'shared'].includes(v) ? [chip('Home', false, go('home')), chip('Duels', v === 'duels', go('duels')), chip('History', v === 'history', go('history'))] : navDefs.slice(0, 0).map(([l, k]) => chip(l, v === k || (k === 'home' && ['round', 'result', 'shared'].includes(v)), go(k)));
+    const fv = this.famVals();
+
+    const persons = ['Meg', 'Cathleen'].map(pn => {
+      const c = P[pn];
+      return {
+        name: pn, initial: pn[0], open: !!s.unl[pn], locked: !s.unl[pn], pin: s.pinIn[pn] || '', pinErr: s.pinErr[pn] || '', onPin: (e) => this.setState({ pinIn: Object.assign({}, s.pinIn, { [pn]: e.target.value }) }), unlock: () => { if ((s.pinIn[pn] || '').trim() === this.PINS[pn.toLowerCase()]) { const unl = Object.assign({}, s.unl, { [pn]: true }); try { sessionStorage.setItem('nameDuel.unl', JSON.stringify(unl)); } catch (e) {} this.setState({ unl, pinErr: {} }); } else this.setState({ pinErr: Object.assign({}, s.pinErr, { [pn]: 'That PIN is not right.' }) }); }, color: c.c, dark: c.d, soft: c.s, grad: `linear-gradient(135deg,${c.c},${c.c2})`,
+        tiles: ['Boy', 'Girl'].map(g => {
+          const r = d.rounds[pn + '|' + g], last = this.latest(pn, g);
+          const status = r ? 'In progress · ' + (r.queue.length + r.current.length) + ' left' : last ? 'Completed · ' + this.fmt(last.date).split(',').slice(0, 2).join(',') : 'Not started';
+          const ch = this.changes(pn, g), warn = !!(ch && (ch.added || ch.removed));
+          const parts = ch ? [ch.added ? ch.added + ' added' : '', ch.removed ? ch.removed + ' removed' : ''].filter(Boolean).join(', ') : '';
+          return { isBoy: g === 'Boy', isGirl: g === 'Girl', warn, warnText: parts + ' since completed. Play again to update your ranking.', label: g + 's', status, btn: r ? 'Resume' : last ? 'Play again' : 'Start', hasView: !!last, onStart: () => this.begin(pn, g), onView: () => this.setState({ view: 'result', result: Object.assign({ celebrate: false }, last) }) };
+        })
+      };
+    });
+    const sharedTiles = ['Boy', 'Girl'].map(g => {
+      const a = this.latest('Meg', g), b = this.latest('Cathleen', g), ready = !!(a && b);
+      const miss = !a && !b ? 'Meg and Cathleen' : !a ? 'Meg' : 'Cathleen';
+      return { isBoy: g === 'Boy', isGirl: g === 'Girl', label: g + 's', ready, waiting: !ready, note: 'Waiting for ' + miss + ' to finish ' + g.toLowerCase() + 's.', onOpen: () => this.openShared(g) };
+    });
+
+    const rd = s.round, rc = rd ? P[rd.person] : P.Meg;
+    const total = rd ? Object.keys(rd.stats).length : 1;
+    const remaining = rd ? rd.queue.length + rd.current.length : 0;
+    const cards = rd ? rd.current.map((n, i) => {
+      const won = s.phase === 'out' && s.chosen === i, lost = s.phase === 'out' && s.chosen !== i;
+      const grad = won ? 'linear-gradient(135deg,#1fa85a,#128a47)' : i === 0 ? `linear-gradient(135deg,${rc.c},${rc.c2})` : `linear-gradient(135deg,${rc.c2},${rc.c})`;
+      const anim = s.anim % 2 ? 'popB' : 'popA';
+      let ext = s.phase === 'in' ? `animation:${anim} .6s ${i * 0.1}s cubic-bezier(.3,1.4,.5,1) backwards` : (won ? 'transform:scale(1.06)' : 'transform:scale(.94);opacity:.3');
+      return { name: n, chosen: won, loss: !won && rd.stats[n].l === 1, onClick: () => this.pick(i), style: `flex:1;min-width:260px;min-height:300px;border:none;cursor:pointer;border-radius:40px;color:#fff;font-family:'Fredoka';font-weight:700;font-size:clamp(40px,6vw,76px);background:${grad};box-shadow:0 14px 0 ${won ? '#0b6b34' : rc.d},0 30px 50px rgba(40,20,90,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;transition:transform .35s,opacity .35s;${ext}` };
+    }) : [];
+    const canUndo = !!(rd && rd.log && rd.log.length);
+    const recent = rd && rd.log ? rd.log.slice(-3).reverse().map(x => ({ w: x.w, l: x.l })) : [];
+
+    const rs = s.result, rcol = rs ? P[rs.person] : P.Meg;
+    let rv = {};
+    if (rs) {
+      const w = rs.ranking[0];
+      rv = { grad: `linear-gradient(135deg,${rcol.c},${rcol.c2})`, soft: rcol.s, line: rs.person + "'s favourite " + (rs.gender === 'Boy' ? 'boy' : 'girl') + ' name is', letters: this.letters(w.name + '!', rs.celebrate), meaning: this.info(w.meaning), origin: this.info(w.origin), pop: this.info(w.pop), date: (rs.celebrate ? 'Saved ' : 'Round completed ') + this.fmt(rs.date), rest: rs.ranking.slice(1).map((r, i) => ({ rank: i + 2, name: r.name, wins: r.wins, meaning: this.info(r.meaning), pop: this.info(r.pop) })) };
+    }
+
+    let sh = {};
+    if (s.sh) {
+      const rows = this.computeShared(s.sh.g) || [], top = rows[0];
+      sh = { title: s.sh.phase === 'reveal' ? 'Meg and Cathleen agree!' : 'Shared ' + (s.sh.g === 'Boy' ? 'boy' : 'girl') + ' favourite', idle: s.sh.phase === 'idle', drum: s.sh.phase === 'drum', reveal: s.sh.phase === 'reveal', start: () => this.startReveal(), status: s.sh.status, shuffle: s.sh.shuffle,
+        letters: top ? this.letters(top.name + '!', true) : [], meaning: top ? this.info(top.info.meaning) : '', origin: top ? this.info(top.info.origin) : '', pop: top ? this.info(top.info.pop) : '',
+        top: rows.slice(0, 10).map((r, i) => ({ n: i + 1, name: r.name, ra: r.ra, rb: r.rb, score: Math.round(r.score * 100) + '%' })) };
+    }
+
+    const q = s.q.toLowerCase();
+    let bl = this.pool(s.bGender).filter(n => !q || [n.name, n.meaning, n.origin].some(x => (x || '').toLowerCase().includes(q)));
+    const cmp = { name: (a, b) => a.name.localeCompare(b.name), nameD: (a, b) => b.name.localeCompare(a.name), pop: (a, b) => this.popRank(a.pop) - this.popRank(b.pop) || a.name.localeCompare(b.name), popD: (a, b) => { const x = this.popRank(a.pop), y = this.popRank(b.pop); return (x === 99 ? 99 : y === 99 ? -1 : 0) || y - x || a.name.localeCompare(b.name); }, origin: (a, b) => (a.origin || '~').localeCompare(b.origin || '~') || a.name.localeCompare(b.name) };
+    bl = bl.slice().sort(cmp[s.sort]);
+
+    let hl = d.history.filter(h => (s.hP === 'All' || h.person === s.hP) && (s.hG === 'All' || h.gender === s.hG)).sort((a, b) => b.date.localeCompare(a.date));
+
+    return {
+      nav, goHome: s.fam ? go(s.famUser ? 'fHome' : 'fLogin') : go('home'), goImport: go('import'), isHome: v === 'home', isRound: v === 'round' && !!rd, isResult: v === 'result' && !!rs, isShared: v === 'shared' && !!s.sh, isBrowse: v === 'browse', isHistory: v === 'history', isImport: v === 'import', isSettings: v === 'settings',
+      noNames: !d.names.length, hasNames: d.names.length > 0, nameCount: d.names.length, boyCount: this.pool('Boy').length, girlCount: this.pool('Girl').length,
+      persons, sharedTiles, confetti: s.confetti,
+      rcolor: rc.c, rperson: rd ? rd.person : '', rgender: rd ? rd.gender + 's' : '', remaining, progress: Math.round((1 - remaining / total) * 100), cards,
+      undo: () => this.undo(), undoStyle: `font-family:'Fredoka';font-weight:600;font-size:16px;border-radius:999px;padding:8px 20px;border:2px solid ${rc.c};background:${canUndo ? rc.c : 'transparent'};color:${canUndo ? '#fff' : rc.c};cursor:${canUndo ? 'pointer' : 'default'};opacity:${canUndo ? 1 : .45}`,
+      rv, sh, recent, hasRecent: recent.length > 0,
+      bChips: [chip('Boys', s.bGender === 'Boy', () => this.setState({ bGender: 'Boy' }), '#1a86c4'), chip('Girls', s.bGender === 'Girl', () => this.setState({ bGender: 'Girl' }), '#d9531e')],
+      q: s.q, sort: s.sort, onQ: (e) => this.setState({ q: e.target.value }), onSort: (e) => this.setState({ sort: e.target.value }),
+      openAdd: () => this.setState({ form: { idx: -1, name: '', gender: s.bGender, meaning: '', origin: '', pop: '' }, formMsg: '' }),
+      showForm: !!s.form, formTitle: s.form && s.form.idx >= 0 ? 'Edit name' : 'Add a name', formMsg: s.formMsg,
+      fName: s.form ? s.form.name : '', fMeaning: s.form ? s.form.meaning : '', fOrigin: s.form ? s.form.origin : '', fPop: s.form ? s.form.pop : '',
+      onFName: (e) => this.setF('name', e.target.value), onFMeaning: (e) => this.setF('meaning', e.target.value), onFOrigin: (e) => this.setF('origin', e.target.value), onFPop: (e) => this.setF('pop', e.target.value),
+      fGenders: [['Boy', 'Boy', '#1a86c4'], ['Girl', 'Girl', '#d9531e'], ['Both', 'Both (unisex)', '#6c5ce7']].map(([k, l, c]) => chip(l, s.form && s.form.gender === k, () => this.setF('gender', k), c)),
+      saveForm: () => this.saveForm(), autoFill: () => this.autoFill(), fillLabel: s.filling ? 'Looking it up…' : '✨ Fill in details', closeForm: () => this.setState({ form: null, formMsg: '' }),
+      bCount: bl.length, bList: bl.map(n => ({ gender: n.gender === 'Both' ? 'Boy + Girl' : n.gender, gStyle: 'display:inline-block;margin-top:4px;font-weight:800;font-size:12px;border-radius:999px;padding:2px 10px;' + (n.gender === 'Boy' ? 'background:#dcefff;color:#0f5f8f' : n.gender === 'Girl' ? 'background:#ffe6d6;color:#a8420f' : 'background:#e6e2ff;color:#4b3bc4'), onEdit: () => this.setState({ form: { idx: d.names.indexOf(d.names.find(x => x.name === n.name)), name: n.name, gender: n.gender, meaning: n.meaning || '', origin: n.origin || '', pop: n.pop || '' }, formMsg: '' }), onRemove: () => this.removeName(n), famLabel: n.fam ? '★ In family vote' : '☆ Add to family vote', famStyle: "font-family:'Fredoka';font-weight:600;font-size:13px;border-radius:999px;padding:3px 12px;cursor:pointer;border:2px solid #1fb5a5;background:" + (n.fam ? '#1fb5a5' : '#fff') + ';color:' + (n.fam ? '#fff' : '#12857a'), onFam: () => this.toggleFam(n), name: n.name, meaning: this.info(n.meaning), origin: this.info(n.origin), pop: this.info(n.pop) })),
+      hpChips: ['All', 'Meg', 'Cathleen'].map(p => chip(p === 'All' ? 'Everyone' : p, s.hP === p, () => this.setState({ hP: p }), p === 'All' ? null : P[p].c)),
+      hgChips: ['All', 'Boy', 'Girl'].map(g => chip(g === 'All' ? 'Boys & Girls' : g + 's', s.hG === g, () => this.setState({ hG: g }))),
+      noHist: !hl.length, hist: hl.map(h => ({ person: h.person, gender: h.gender + 's', color: P[h.person].c, date: this.fmt(h.date), winner: h.winner, onView: () => this.setState({ view: 'result', result: Object.assign({ celebrate: false }, h) }) })),
+      onFile: (e) => { const f = e.target.files[0]; if (f) this.handleFile(f); }, loadAttached: () => this.loadAttached(false), importMsg: s.importMsg,
+      askReset: () => this.setState({ modal: { title: 'Reset all data?', body: 'This permanently deletes the name list, in-progress rounds and all history.', confirm: 'Yes, reset everything', hasCancel: true, onConfirm: () => { try { localStorage.removeItem('nameDuel.v1'); } catch (e) {} this.setState({ data: { names: [], rounds: {}, history: [] }, view: 'home', round: null, result: null, importMsg: '' }); } } }),
+      hasModal: !!s.modal, modal: s.modal || {}, closeModal: () => this.setState({ modal: null }),
+      confirmModal: () => { const m = s.modal; this.setState({ modal: null }); if (m && m.onConfirm) m.onConfirm(); },
+      ...fv
+    };
+  }
+}
+</script>
+</body>
+</html>
